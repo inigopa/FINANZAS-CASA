@@ -427,6 +427,11 @@ canvas{max-width:100%; display:block;}
   .esc-controls select{grid-column:1 / -1; min-width:0; width:100%; font-size:16px;}
 }
 
+/* ---------- PLANTILLA (pantalla de inicio) ---------- */
+.tpl-box{margin:18px 0 6px; padding-top:14px; border-top:1px solid var(--line-soft);}
+.tpl-box p{font-size:13.5px; margin:0 0 10px;}
+.tpl-box .btn{width:100%; text-align:center;}
+
 footer.pagefoot{margin-top:60px; padding-top:16px; border-top:1px solid var(--line-soft); font-size:12px; color:var(--ink-faint);}
 </style>
 </head>
@@ -436,11 +441,15 @@ footer.pagefoot{margin-top:60px; padding-top:16px; border-top:1px solid var(--li
   <div id="upload-box">
     <div class="mark">FINANZAS CASA</div>
     <h1>Abrir datos</h1>
-    <p>Abre el fichero más reciente de la carpeta <b>Finanzas Casa</b> de Google Drive (se llama <span class="mono">finanzas_casa_AAAA-MM-DD_HHMM.json</span>). En el móvil, al pulsar el botón elige <b>Drive</b> en el selector de archivos. Los cambios se guardan solos en este dispositivo; cuando termines, pulsa <b>Guardar en Drive</b> para que el otro también los vea.</p>
+    <p>Abre el fichero más reciente de la carpeta <b>Finanzas Casa</b> de Google Drive (se llama <span class="mono">finanzas_casa_AAAA-MM-DD_HHMM</span>, en <span class="mono">.json</span> o <span class="mono">.txt</span>). En el móvil, al pulsar el botón elige <b>Drive</b> en el selector de archivos. Los cambios se guardan solos en este dispositivo; cuando termines, pulsa <b>Guardar en Drive</b> para que el otro también los vea.</p>
     <label for="fileinput" class="btn upload-main-btn">Abrir fichero de Drive</label>
     <div id="drop">
       También puedes arrastrarlo aquí. Admite el <span class="mono">.json</span> guardado desde la app, el consolidado original o su <span class="mono">.xlsx</span>.
       <input type="file" id="fileinput" accept="application/json,.json,text/plain,.txt,.xlsx">
+    </div>
+    <div class="tpl-box">
+      <p><b>¿Empiezas de cero?</b> Descarga la plantilla, rellena tus movimientos en la hoja <i>Movimientos</i> y ábrela aquí con el botón de arriba.</p>
+      <button type="button" class="btn secondary" id="btn-plantilla">Descargar plantilla Excel (.xlsx)</button>
     </div>
     <a href="#" id="upload-back" style="display:none; font-size:13px;">← Volver a los datos que ya tenía abiertos</a>
     <div id="upload-error"></div>
@@ -878,7 +887,7 @@ function autoIngresoCategoria(r){
   if(r.fuente === 'cuenta_ahorro') return 'De ahorro';
   const c = stripAccents((r.observaciones||'') + ' ' + (r.concepto||'') + ' ' + (r.movimiento||'')).toLowerCase();
   if(c.includes('extra')) return 'Extras';
-  if(c.includes('nomina') || c.includes('nomkna') || c.includes('marta') || c.includes('pension')) return 'Nóminas';
+  if(c.includes('nomina') || c.includes('nomkna') || c.includes('pension')) return 'Nóminas';
   return 'Otros';
 }
 
@@ -1670,7 +1679,16 @@ function renderCatManagePanel(){
 // Fecha/Tarjeta/Concepto/Importe), aplica una categorización razonable, reconcilia
 // traspasos contra lo ya cargado, descarta duplicados exactos y añade el resto como
 // "Sin categorizar" listo para revisar en la tabla.
-const FUENTES_CONOCIDAS = ['cuenta_inigo','cuenta_comun','cuenta_ahorro','tarjeta_inigo','tarjeta_comun'];
+// Cuentas y tarjetas que se ofrecen al importar un extracto: las que ya existen en los
+// datos cargados (sin los descuentos de nómina) más unas genéricas. Cuentas primero.
+const FUENTES_GENERICAS = ['cuenta_comun','cuenta_ahorro','tarjeta_comun'];
+function fuentesConocidas(){
+  const set = new Set(FUENTES_GENERICAS);
+  (MOV || []).forEach(m => { if(m.fuente && !/^nomina/i.test(m.fuente)) set.add(m.fuente); });
+  const arr = Array.from(set);
+  const rank = f => /^tarjeta/i.test(f) ? 1 : 0;
+  return arr.sort((a,b) => rank(a) - rank(b) || a.localeCompare(b, 'es'));
+}
 
 function toggleImportPanel(){
   const panel = document.getElementById('import-extracto-panel');
@@ -1692,7 +1710,7 @@ function renderImportPanel(){
         <div>
           <label>¿De qué cuenta o tarjeta es este extracto?</label>
           <select id="import-fuente">
-            ${FUENTES_CONOCIDAS.map(f=>`<option value="${f}">${f}</option>`).join('')}
+            ${fuentesConocidas().map(f=>`<option value="${f}">${escapeHtml(f)}</option>`).join('')}
           </select>
         </div>
         <div>
@@ -1725,7 +1743,7 @@ function importStatementFile(file, fuente){
       const wb = XLSX.read(reader.result, {type:'array', cellDates:true});
       const sheet = wb.Sheets[wb.SheetNames[0]];
       const aoa = XLSX.utils.sheet_to_json(sheet, {header:1, defval:null, raw:true});
-      const isCard = FUENTES_CONOCIDAS.indexOf(fuente) >= 3;
+      const isCard = /^tarjeta/i.test(fuente);
       const requiredCols = isCard ? ['Fecha','Tarjeta','Concepto','Importe'] : ['Fecha','Concepto','Movimiento','Importe'];
       let headerIdx = -1;
       for(let i=0;i<Math.min(aoa.length,15);i++){
@@ -2789,7 +2807,24 @@ function renderGraficos(){
 }
 
 // ---------- FILE LOADING ----------
+// Valor sí/no de una celda: acepta TRUE/FALSE, 1/0 y también sí/no/verdadero/falso/x
+// (una plantilla rellenada a mano). Devuelve null si la celda está vacía.
+function xlsxBool(v){
+  if(v === true || v === 1) return true;
+  if(v === false || v === 0) return false;
+  if(v === null || v === undefined) return null;
+  const t = stripAccents(String(v)).trim().toLowerCase();
+  if(t === '') return null;
+  if(['true','si','s','verdadero','x','1','yes'].includes(t)) return true;
+  return false;
+}
+function xlsxCell(r, key){
+  const v = r[key];
+  return (v === null || v === undefined || String(v).trim() === '') ? null : v;
+}
 function xlsxRowsToMovimientos(rows){
+  // Filas totalmente vacías (típico al rellenar la plantilla a mano) se ignoran
+  rows = rows.filter(r => xlsxCell(r, 'Fecha') !== null || xlsxCell(r, 'Concepto') !== null || xlsxCell(r, 'Importe') !== null);
   return rows.map((r, idx) => {
     let fecha = r['Fecha'];
     let fechaStr, fechaIso;
@@ -2802,28 +2837,117 @@ function xlsxRowsToMovimientos(rows){
       fechaIso = parts.length===3 ? `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}` : '';
     }
     const importeRaw = r['Importe'];
-    const importe = typeof importeRaw === 'number' ? importeRaw : parseFloat(String(importeRaw).replace(/\./g,'').replace(',', '.'));
+    const importe = typeof importeRaw === 'number' ? importeRaw : parseFloat(String(importeRaw).replace(/\./g,'').replace(',', '.').replace(/[€\s]/g,''));
+    const imp = isNaN(importe) ? 0 : importe;
+    // Valores por defecto SOLO si la celda está vacía (un Excel exportado por la app los trae todos)
+    let categoria = xlsxCell(r, 'Categoría');
+    if(categoria !== null) categoria = String(categoria).trim();
+    if(categoria !== null && stripAccents(categoria).toUpperCase() === 'INGRESO') categoria = 'INGRESO';
+    if(categoria === null) categoria = imp > 0 ? 'INGRESO' : PENDING_CATEGORY;
+    const esInterno = /^(EXCLUIR_|INVERSION)/.test(categoria);
+    const incluirCell = xlsxBool(xlsxCell(r, 'Incluir en gasto'));
+    const incluir = incluirCell !== null ? incluirCell : (categoria !== 'INGRESO' && !esInterno && imp < 0);
+    const fvCell = xlsxCell(r, 'Fijo/Variable');
+    const fv = fvCell !== null ? (/^f/i.test(String(fvCell).trim()) ? 'Fijo' : 'Variable') : (FIJOS_DISPLAY.has(categoria) ? 'Fijo' : 'Variable');
+    const evCell = xlsxBool(xlsxCell(r, 'Evento puntual'));
+    const evDesc = xlsxCell(r, 'Descripción evento');
     return {
       row_id: r['ID'] || ('XLS-' + idx),
       fecha: fechaStr,
       fecha_iso: fechaIso,
-      fuente: r['Fuente'],
-      tipo: r['Tipo'],
-      concepto: r['Concepto'],
-      importe: isNaN(importe) ? 0 : importe,
-      categoria: r['Categoría'],
+      fuente: xlsxCell(r, 'Fuente') !== null ? String(r['Fuente']).trim() : 'cuenta_comun',
+      tipo: xlsxCell(r, 'Tipo') !== null ? String(r['Tipo']).trim().toLowerCase() : (/^tarjeta/i.test(String(r['Fuente']||'')) ? 'tarjeta' : 'cuenta'),
+      concepto: r['Concepto'] == null ? '' : String(r['Concepto']),
+      importe: imp,
+      categoria,
       categoria_ingreso: r['Categoría ingreso'] || undefined,
-      fijo_variable: r['Fijo/Variable'],
-      incluir_en_gasto: r['Incluir en gasto'] === true || r['Incluir en gasto'] === 'TRUE' || r['Incluir en gasto'] === 1,
-      es_evento_puntual: r['Evento puntual'] === true || r['Evento puntual'] === 'TRUE' || r['Evento puntual'] === 1,
-      evento_puntual: r['Descripción evento'] || null,
-      es_estimado: r['Estimado'] === true || r['Estimado'] === 'TRUE' || r['Estimado'] === 1,
-      es_importado: r['Importado'] === true || r['Importado'] === 'TRUE' || r['Importado'] === 1,
+      fijo_variable: fv,
+      incluir_en_gasto: incluir,
+      // Si solo rellenas la descripción del evento, se entiende que es evento puntual
+      es_evento_puntual: evCell !== null ? evCell : evDesc !== null,
+      evento_puntual: evDesc !== null ? String(evDesc) : null,
+      es_estimado: xlsxBool(r['Estimado']) === true,
+      es_importado: xlsxBool(r['Importado']) === true,
       observaciones: r['Observaciones'] || null
     };
   });
 }
 
+
+// ---------- PLANTILLA EXCEL PARA EMPEZAR DE CERO ----------
+// Mismas columnas que lee "Abrir" (y que exporta "Exportar Excel corregido").
+const TPL_COLS = ['Fecha','Fuente','Tipo','Concepto','Importe','Categoría','Categoría ingreso','Fijo/Variable','Incluir en gasto','Evento puntual','Descripción evento','Observaciones'];
+function downloadTemplateXLSX(){
+  if(typeof XLSX === 'undefined'){ showToast('No se ha podido cargar la librería de Excel. Prueba a recargar la página.', true); return; }
+  const wb = XLSX.utils.book_new();
+  const widths = [{wch:12},{wch:16},{wch:9},{wch:34},{wch:11},{wch:26},{wch:17},{wch:13},{wch:15},{wch:14},{wch:24},{wch:30}];
+
+  // 1) Movimientos: vacía, solo cabeceras. Es la hoja que lee la app.
+  const wsMov = XLSX.utils.aoa_to_sheet([TPL_COLS]);
+  wsMov['!cols'] = widths;
+  XLSX.utils.book_append_sheet(wb, wsMov, 'Movimientos');
+
+  // 2) Ejemplos: cómo se rellena cada caso (esta hoja NO se importa)
+  const ej = [
+    TPL_COLS,
+    ['28/01/2026','cuenta_comun','cuenta','Nómina enero', 1650, 'INGRESO','Nóminas','','','','',''],
+    ['15/06/2026','cuenta_comun','cuenta','Paga extra junio', 1500, 'INGRESO','Extras','','','','',''],
+    ['01/01/2026','cuenta_comun','cuenta','Recibo alquiler', -690, 'Comunidad/Vivienda','','Fijo','Sí','','',''],
+    ['08/01/2026','cuenta_comun','cuenta','Recibo luz', -54.30, 'Luz','','Fijo','Sí','','',''],
+    ['10/01/2026','tarjeta_comun','tarjeta','Supermercado', -63.45, 'Supermercado/Alimentación','','Variable','Sí','','',''],
+    ['12/01/2026','tarjeta_comun','tarjeta','Cena cumpleaños', -48, 'Restaurantes/Cafeterías','','','','','',''],
+    ['20/07/2026','tarjeta_comun','tarjeta','Apartamento vacaciones', -690, 'Viajes/Hoteles','','Variable','Sí','Sí','Vacaciones verano 2026',''],
+    ['02/01/2026','cuenta_comun','cuenta','Traspaso a cuenta ahorro', -150, 'EXCLUIR_TRASPASO_INTERNO','','','No','','','No es gasto: dinero que se mueve entre tus cuentas'],
+    ['05/02/2026','cuenta_comun','cuenta','Pago mensual de la tarjeta', -820, 'EXCLUIR_PAGO_TARJETA','','','No','','','No es gasto: las compras ya están en las filas de la tarjeta']
+  ];
+  const wsEj = XLSX.utils.aoa_to_sheet(ej);
+  wsEj['!cols'] = widths;
+  XLSX.utils.book_append_sheet(wb, wsEj, 'Ejemplos');
+
+  // 3) Instrucciones
+  const ins = [
+    ['CÓMO RELLENAR LA PLANTILLA'],
+    [''],
+    ['1. Escribe una fila por movimiento en la hoja «Movimientos» (la hoja «Ejemplos» no se importa).'],
+    ['2. Guarda el Excel y ábrelo en la app con «Abrir fichero de Drive» (sirve tanto desde Drive como desde el propio dispositivo).'],
+    ['3. Dentro de la app puedes corregir categorías y demás. Después pulsa «Guardar en Drive»: a partir de ahí usa ese fichero.'],
+    [''],
+    ['Columna','¿Obligatoria?','Qué poner'],
+    ['Fecha','Sí','Día/mes/año, p. ej. 15/03/2026 (o una fecha de Excel).'],
+    ['Concepto','Sí','Texto libre: comercio, recibo, nómina…'],
+    ['Importe','Sí','Negativo para gastos (-45,20) y positivo para ingresos (1650).'],
+    ['Fuente','No','Cuenta o tarjeta de donde sale, p. ej. cuenta_comun, tarjeta_comun. Vacío = cuenta_comun.'],
+    ['Tipo','No','cuenta o tarjeta. Vacío = se deduce de la Fuente.'],
+    ['Categoría','No','Una de la hoja «Listas». Vacío = INGRESO si el importe es positivo; si no, «Sin categorizar» (lo categorizas luego en la app).'],
+    ['Categoría ingreso','No','Solo para ingresos: Nóminas, Extras, De ahorro u Otros.'],
+    ['Fijo/Variable','No','Fijo o Variable. Vacío = según la categoría (hipoteca, luz, seguros… son fijos).'],
+    ['Incluir en gasto','No','Sí o No. Vacío = Sí para gastos normales y No para ingresos y movimientos internos.'],
+    ['Evento puntual','No','Sí para gastos grandes que no se repiten (obra, viaje…), para que no inflen las medias. Vacío = No.'],
+    ['Descripción evento','No','Nombre del evento, p. ej. «Vacaciones verano 2026». Si lo rellenas, cuenta como evento puntual.'],
+    ['Observaciones','No','Notas libres.'],
+    [''],
+    ['Movimientos internos: los traspasos entre tus cuentas y el pago mensual de la tarjeta NO son gasto (las compras ya van en las filas de la tarjeta).'],
+    ['Usa las categorías EXCLUIR_TRASPASO_INTERNO o EXCLUIR_PAGO_TARJETA (hoja «Listas») para que no se cuenten dos veces.']
+  ];
+  const wsIns = XLSX.utils.aoa_to_sheet(ins);
+  wsIns['!cols'] = [{wch:20},{wch:14},{wch:110}];
+  XLSX.utils.book_append_sheet(wb, wsIns, 'Instrucciones');
+
+  // 4) Listas de valores válidos
+  const gasto = allCategories();
+  const ingresos = ['INGRESO (en la columna Categoría)', ...INGRESO_CATEGORIES.map(c => '   ' + c + ' (en Categoría ingreso)')];
+  const internos = Object.keys(INTERNAL_LABELS).map(k => k + ' — ' + INTERNAL_LABELS[k]);
+  const fuentes = ['cuenta_comun','cuenta_personal','cuenta_ahorro','tarjeta_comun','tarjeta_personal','(o cualquier otro nombre corto)'];
+  const n = Math.max(gasto.length, ingresos.length, internos.length, fuentes.length);
+  const listas = [['Categorías de gasto','Ingresos','Movimientos internos (no son gasto)','Fuentes (ejemplos)','Tipo','Fijo/Variable']];
+  for(let i=0;i<n;i++) listas.push([gasto[i]||'', ingresos[i]||'', internos[i]||'', fuentes[i]||'', ['cuenta','tarjeta'][i]||'', ['Fijo','Variable'][i]||'']);
+  const wsL = XLSX.utils.aoa_to_sheet(listas);
+  wsL['!cols'] = [{wch:28},{wch:36},{wch:70},{wch:30},{wch:8},{wch:13}];
+  XLSX.utils.book_append_sheet(wb, wsL, 'Listas');
+
+  const out = XLSX.write(wb, {bookType:'xlsx', type:'array'});
+  saveFileAnywhere(new Blob([out], {type: MIME_BY_EXT.xlsx}), 'plantilla_finanzas_casa.xlsx');
+}
 
 // ---------- DIÁLOGOS PROPIOS ----------
 // confirm()/prompt() nativos pueden estar bloqueados dentro del visor de claude.ai
@@ -3364,6 +3488,7 @@ function setupUpload(){
     document.getElementById('upload-back').style.display = (MOV && MOV.length) ? 'inline' : 'none';
   };
   document.querySelectorAll('.open-other-btn').forEach(b => b.addEventListener('click', () => { closeMobileMenu(); openOther(); }));
+  document.getElementById('btn-plantilla').addEventListener('click', downloadTemplateXLSX);
   document.getElementById('upload-back').addEventListener('click', (e) => {
     e.preventDefault();
     document.getElementById('upload-screen').style.display = 'none';
