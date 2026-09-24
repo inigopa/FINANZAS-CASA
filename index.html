@@ -1,0 +1,3423 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Finanzas Casa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EDEFEC;
+  --paper-raised:#F6F7F4;
+  --ink:#1F3B36;
+  --ink-soft:#4B6660;
+  --ink-faint:#8A9C97;
+  --line:#C7D0CB;
+  --line-soft:#DDE3DF;
+  --wine:#8C3B3B;
+  --wine-soft:#B97575;
+  --gold:#A9822E;
+  --accent-fixed:#3D6B5F;
+  --accent-var:#8C3B3B;
+  --white:#FFFFFF;
+  --radius:2px;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --serif: 'Source Serif 4', Georgia, serif;
+}
+:root:not([data-theme="light"]){
+  @media (prefers-color-scheme: dark){
+    --paper:#12181A;
+    --paper-raised:#1A2224;
+    --ink:#E7EEEA;
+    --ink-soft:#A9BDB6;
+    --ink-faint:#6E827B;
+    --line:#2C3A38;
+    --line-soft:#22302D;
+    --wine:#D98282;
+    --wine-soft:#B25C5C;
+    --gold:#D9B65C;
+    --accent-fixed:#7FB3A2;
+    --accent-var:#D98282;
+    --white:#1A2224;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#12181A;
+  --paper-raised:#1A2224;
+  --ink:#E7EEEA;
+  --ink-soft:#A9BDB6;
+  --ink-faint:#6E827B;
+  --line:#2C3A38;
+  --line-soft:#22302D;
+  --wine:#D98282;
+  --wine-soft:#B25C5C;
+  --gold:#D9B65C;
+  --accent-fixed:#7FB3A2;
+  --accent-var:#D98282;
+  --white:#1A2224;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--serif);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:var(--gold); color:var(--paper);}
+a{color:inherit;}
+button{font-family:var(--serif); cursor:pointer;}
+.mono{font-family:var(--mono);}
+.num{font-family:var(--mono); font-variant-numeric:tabular-nums; letter-spacing:-0.02em;}
+
+/* ---------- LAYOUT ---------- */
+#app{display:flex; min-height:100vh;}
+#sidebar{
+  width:220px; flex-shrink:0;
+  border-right:1px solid var(--line);
+  padding:28px 0 20px;
+  position:sticky; top:0; height:100vh;
+  display:flex; flex-direction:column;
+}
+#brand{padding:0 24px 22px; border-bottom:1px solid var(--line-soft); margin-bottom:14px;}
+#brand .mark{font-size:11px; letter-spacing:.14em; color:var(--ink-faint); margin-bottom:4px;}
+#brand h1{font-size:21px; margin:0; font-weight:600; line-height:1.15;}
+nav{display:flex; flex-direction:column; gap:1px; flex:1;}
+nav button{
+  background:none; border:none; text-align:left; padding:11px 24px;
+  font-size:14.5px; color:var(--ink-soft); border-left:2px solid transparent;
+}
+nav button:hover{color:var(--ink); background:var(--paper-raised);}
+nav button.active{color:var(--ink); border-left-color:var(--wine); background:var(--paper-raised); font-weight:600;}
+#sidebar-foot{padding:14px 24px 0; border-top:1px solid var(--line-soft); margin-top:10px;}
+#sidebar-foot button{
+  width:100%; padding:8px 0; font-size:12.5px; color:var(--ink-faint); background:none; border:none; text-align:left;
+}
+#sidebar-foot button:hover{color:var(--ink);}
+
+#main{flex:1; min-width:0; padding:36px 44px 80px; max-width:1180px;}
+.view{display:none;}
+.view.active{display:block;}
+
+h2.pagetitle{font-size:26px; margin:0 0 4px; font-weight:600;}
+p.pagesub{color:var(--ink-soft); font-size:14.5px; margin:0 0 28px; max-width:640px; line-height:1.5;}
+
+/* ---------- MOBILE NAV ---------- */
+#mobilebar{display:none;}
+@media (max-width: 860px){
+  #sidebar{display:none;}
+  #mobilebar{
+    display:flex; position:sticky; top:0; z-index:20;
+    background:var(--paper); border-bottom:1px solid var(--line);
+    padding:14px 16px; align-items:center; justify-content:space-between;
+  }
+  #mobilebar h1{font-size:17px; margin:0; font-weight:600;}
+  #mobilebar select{
+    font-family:var(--serif); font-size:14px; background:var(--paper-raised);
+    border:1px solid var(--line); color:var(--ink); padding:7px 10px; border-radius:var(--radius);
+  }
+  #main{padding:20px 16px 60px;}
+  h2.pagetitle{font-size:21px;}
+  .kpi-row{display:grid; grid-template-columns:1fr 1fr; border:none; gap:1px; background:var(--line);}
+  .kpi{border:none; background:var(--paper-raised); min-width:0;}
+  .kpi .value{font-size:19px;}
+  table.data{font-size:12.5px;}
+  .field-grid{grid-template-columns:1fr 1fr;}
+}
+@media (max-width:420px){
+  .field-grid{grid-template-columns:1fr;}
+}
+
+/* ---------- UPLOAD SCREEN ---------- */
+#upload-screen{
+  min-height:100vh; display:flex; align-items:center; justify-content:center;
+  padding:24px;
+}
+#upload-box{
+  max-width:460px; width:100%; text-align:left;
+  border:1px solid var(--line); background:var(--paper-raised); padding:38px 34px;
+}
+#upload-box .mark{font-size:11px; letter-spacing:.14em; color:var(--ink-faint); margin-bottom:10px;}
+#upload-box h1{font-size:28px; margin:0 0 12px; font-weight:600;}
+#upload-box p{color:var(--ink-soft); font-size:14.5px; line-height:1.6; margin:0 0 22px;}
+#drop{
+  border:1.5px dashed var(--line); padding:26px; text-align:center; font-size:14px; color:var(--ink-soft);
+  margin-bottom:14px; transition:border-color .15s;
+}
+#drop.drag{border-color:var(--wine); color:var(--ink);}
+#drop input{display:none;}
+#drop label{color:var(--wine); text-decoration:underline; cursor:pointer;}
+#upload-error{color:var(--wine); font-size:13px; margin-top:10px; display:none;}
+#upload-status{color:var(--ink-faint); font-size:12.5px; margin-top:14px;}
+
+/* ---------- KPI ROW ---------- */
+.kpi-row{display:flex; gap:0; border:1px solid var(--line); margin-bottom:32px; flex-wrap:wrap;}
+.kpi{flex:1; min-width:140px; padding:18px 22px; border-right:1px solid var(--line-soft);}
+.kpi:last-child{border-right:none;}
+.kpi .label{font-size:11.5px; color:var(--ink-faint); letter-spacing:.03em; margin-bottom:8px;}
+.kpi .value{font-size:23px; font-weight:600;}
+.kpi .sub{font-size:12px; color:var(--ink-soft); margin-top:4px;}
+.kpi .value.neg{color:var(--wine);}
+.kpi .value.pos{color:var(--accent-fixed);}
+
+/* ---------- SECTION BLOCKS ---------- */
+.block{margin-bottom:38px;}
+.block-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:10px;}
+.block-head h3{font-size:16px; margin:0; font-weight:600;}
+.block-head .note{font-size:12.5px; color:var(--ink-faint);}
+
+/* ---------- CONTROLS ---------- */
+.controls{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px; align-items:center;}
+.controls select, .controls input[type=text], .controls input[type=number]{
+  font-family:var(--serif); font-size:13.5px; background:var(--paper-raised);
+  border:1px solid var(--line); color:var(--ink); padding:7px 10px; border-radius:var(--radius);
+}
+.chk{display:flex; align-items:center; gap:6px; font-size:13px; color:var(--ink-soft); cursor:pointer;}
+.chk input{accent-color:var(--wine);}
+.btn{
+  font-family:var(--serif); font-size:13.5px; background:var(--ink); color:var(--paper);
+  border:none; padding:8px 16px; border-radius:var(--radius);
+}
+.btn.secondary{background:none; color:var(--ink); border:1px solid var(--line);}
+.btn.danger{background:none; color:var(--wine); border:1px solid var(--wine-soft);}
+.btn:hover{opacity:.85;}
+
+/* ---------- TABLE ---------- */
+.table-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch; border-bottom:1px solid var(--line-soft); margin-bottom:4px;}
+table.data{width:100%; border-collapse:collapse; font-size:13.5px; min-width:540px;}
+table.data.wide{min-width:720px;}
+table.data th{
+  text-align:left; font-weight:600; font-size:11.5px; letter-spacing:.03em; color:var(--ink-faint);
+  border-bottom:1px solid var(--line); padding:8px 10px;
+}
+table.data td{padding:8px 10px; border-bottom:1px solid var(--line-soft); vertical-align:top;}
+table.data tr:hover td{background:var(--paper-raised);}
+table.data td.amt{text-align:right; font-family:var(--mono); white-space:nowrap;}
+table.data td.amt.neg{color:var(--wine);}
+.tag{
+  display:inline-block; font-size:11px; padding:1px 7px; border:1px solid var(--line); color:var(--ink-soft);
+  border-radius:20px;
+}
+.tag.evento{border-color:var(--gold); color:var(--gold);}
+.tag.estimado{border-color:var(--ink-faint); color:var(--ink-faint); font-style:italic;}
+
+/* ---------- BARS (custom, no chart lib needed for simple ones) ---------- */
+.barlist{display:flex; flex-direction:column; gap:9px;}
+.barrow{display:grid; grid-template-columns:150px 1fr 90px; align-items:center; gap:12px; font-size:13px;}
+.barrow .catname{color:var(--ink-soft); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.bartrack{height:11px; background:var(--line-soft); position:relative;}
+.barfill{height:100%; background:var(--ink); position:absolute; left:0; top:0;}
+.barfill.fixed{background:var(--accent-fixed);}
+.barfill.var{background:var(--accent-var);}
+.barrow .val{text-align:right; font-family:var(--mono); font-size:12.5px;}
+@media (max-width:640px){
+  .barrow{grid-template-columns:100px 1fr 70px; gap:8px;}
+}
+
+.legend{display:flex; gap:18px; font-size:12.5px; color:var(--ink-soft); margin-bottom:14px; flex-wrap:wrap;}
+.legend span{display:inline-flex; align-items:center; gap:6px;}
+.legend i{width:10px; height:10px; display:inline-block;}
+
+.empty{color:var(--ink-faint); font-size:13.5px; padding:30px 0; text-align:center; border:1px dashed var(--line);}
+
+.callout{
+  border:1px solid var(--gold); background:var(--paper-raised); padding:12px 16px; margin-bottom:24px;
+  font-size:13px; color:var(--ink-soft); line-height:1.5;
+}
+.callout b{color:var(--ink);}
+
+canvas{max-width:100%; display:block;}
+.chart-wrap{position:relative; width:100%; height:280px;}
+@media (max-width:640px){ .chart-wrap{height:220px;} }
+
+.two-col{display:grid; grid-template-columns:1.3fr 1fr; gap:32px;}
+@media (max-width:900px){.two-col{grid-template-columns:1fr;}}
+
+.field-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:16px;}
+.field-grid label{display:block; font-size:11.5px; color:var(--ink-faint); margin-bottom:5px;}
+.field-grid select, .field-grid input{width:100%;}
+
+.slider-row{display:flex; align-items:center; gap:14px; margin-bottom:22px;}
+.slider-row input[type=range]{flex:1; accent-color:var(--wine);}
+.slider-row .sval{font-family:var(--mono); font-size:15px; min-width:90px; text-align:right;}
+
+/* ---------- GUARDADO / ESTADO ---------- */
+#sync-status{font-size:11.5px; color:var(--ink-faint); margin-bottom:10px; white-space:pre-line; line-height:1.45;}
+#sync-status[data-state="dirty"]{color:var(--gold);}
+#sync-status[data-state="error"]{color:var(--wine);}
+#sidebar-foot .side-save{width:100%; text-align:center; color:var(--paper); background:var(--ink); padding:8px 10px; margin-bottom:6px;}
+#sidebar-foot .side-save:hover{color:var(--paper);}
+.btn:disabled{opacity:.5; cursor:wait;}
+.upload-main-btn{display:block; text-align:center; padding:12px 16px; font-size:15px; margin-bottom:14px; cursor:pointer;}
+#toast{
+  position:fixed; left:50%; transform:translate(-50%, 20px); bottom:calc(18px + env(safe-area-inset-bottom, 0px));
+  width:max-content; max-width:min(92vw, 520px); background:var(--ink); color:var(--paper); font-size:13.5px; line-height:1.4;
+  padding:11px 16px; border-radius:var(--radius); opacity:0; pointer-events:none; transition:opacity .2s, transform .2s; z-index:100;
+}
+#toast.show{opacity:1; transform:translate(-50%, 0);}
+#toast.error{background:var(--wine);}
+
+/* ---------- MÓVIL: estructura ---------- */
+@media (max-width: 860px){
+  #app{flex-direction:column;}                 /* antes: fila → barra y contenido lado a lado */
+  #mobilebar{
+    flex-direction:column; align-items:stretch; gap:8px;
+    padding:calc(10px + env(safe-area-inset-top, 0px)) 12px 10px;
+  }
+  #mobilebar .mb-row{display:flex; align-items:center; gap:8px; min-width:0;}
+  #mobilebar h1{flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  #mobilebar select{width:100%; font-size:16px; padding:9px 10px;}   /* 16px: iOS no hace zoom al tocar */
+  #mobile-sync-dot{font-size:13px; color:var(--accent-fixed);}
+  #mobile-sync-dot[data-state="dirty"]{color:var(--gold);}
+  #mobile-sync-dot[data-state="error"]{color:var(--wine);}
+  .mb-save{padding:8px 12px; font-size:13.5px; white-space:nowrap;}
+  .mb-menu{padding:6px 12px; font-size:16px; line-height:1;}
+  #mobile-menu{border:1px solid var(--line); background:var(--paper-raised); padding:6px 0;}
+  #mobile-menu button{display:block; width:100%; text-align:left; background:none; border:none; color:var(--ink); font-size:15px; padding:11px 14px;}
+  #mobile-sync-text{font-size:12.5px; color:var(--ink-soft); padding:6px 14px 8px; border-bottom:1px solid var(--line-soft);}
+  #main{padding:18px 14px calc(60px + env(safe-area-inset-bottom, 0px)); max-width:100%;}
+}
+
+/* ---------- FORMULARIOS: estilo común (antes los selectores de filtros salían nativos) ---------- */
+.field-grid select, .field-grid input:not([type=checkbox]):not([type=radio]){
+  font-family:var(--serif); font-size:13.5px; background:var(--paper-raised);
+  border:1px solid var(--line); color:var(--ink); padding:7px 10px; border-radius:var(--radius);
+}
+.field-grid input[type=checkbox], .field-grid input[type=radio]{width:auto;}
+.m-only{display:none;}
+.chk-all{display:inline-flex; align-items:center; gap:8px; cursor:pointer;}
+.barrow .val{white-space:nowrap;}
+
+@media (max-width: 860px){
+  /* 3 KPIs en rejilla de 2: el último ocupa toda la fila en vez de dejar un hueco */
+  .kpi-row .kpi:last-child:nth-child(odd){grid-column:1 / -1;}
+  /* Controles de periodo: rejilla ordenada en lugar de piezas sueltas */
+  .controls:has(select[id^="p-"]){display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px;}
+  .controls:has(select[id^="p-"]) .chk{grid-column:1 / -1; order:10;}
+  .controls:has(select[id^="p-"]) select{width:100%; min-width:0;}
+  .controls:has(select[id^="p-"]) select[id$="-pval"]{grid-column:1 / -1;}
+  .controls:has(select[id^="p-"]) select:empty{display:none;}
+  #sel-cat-ing{grid-column:1 / -1;}
+  /* 16px en campos: evita el zoom automático de iOS al tocar un input */
+  .controls select, .controls input[type=text], .controls input[type=number],
+  .field-grid select, .field-grid input:not([type=checkbox]):not([type=radio]){font-size:16px;}
+  .block-head .btn{padding:7px 12px;}
+  #hf-categoria-btn{font-size:16px !important; padding:9px 10px !important;}
+  #hf-categoria-panel{max-width:calc(100vw - 28px);}
+  #view-historico .controls .btn, #view-proyecciones .controls .btn{flex:1 1 auto;}
+}
+
+@media (max-width: 640px){
+  .barrow{grid-template-columns:minmax(0,108px) minmax(40px,1fr) auto; gap:8px;}
+  .m-only{display:inline;}
+
+  /* ---- Tablas → tarjetas ---- */
+  table.data.cards{min-width:0; display:block; font-size:14px;}
+  table.data.cards tbody{display:block;}
+  table.data.cards thead{display:none;}
+  table.data.cards tr{display:grid; gap:4px 10px; padding:11px 2px; border-bottom:1px solid var(--line-soft); align-items:center;}
+  table.data.cards td{display:block; padding:0; border:none; min-width:0;}
+  table.data.cards tr:hover td{background:none;}
+  table.data.cards td[data-label]::before{
+    content:attr(data-label); display:block; font-family:var(--serif); font-size:10.5px; letter-spacing:.04em;
+    text-transform:uppercase; color:var(--ink-faint); font-weight:400; margin-bottom:3px; text-align:left;
+  }
+  table.data.cards select, table.data.cards input:not([type=checkbox]){
+    width:100% !important; max-width:none !important; font-size:16px !important; padding:7px 8px !important;
+  }
+  table.data.cards .btn{padding:7px 10px !important; font-size:12.5px !important;}
+  .table-scroll:has(> table.cards){overflow-x:visible; border-bottom:none;}
+
+  /* Histórico */
+  table.data.hist thead{display:block; border-bottom:1px solid var(--line);}
+  table.data.hist thead tr{display:block; padding:6px 2px;}
+  table.data.hist thead th{display:none; border:none; padding:0;}
+  table.data.hist thead th:first-child{display:block; font-size:13px; letter-spacing:0; color:var(--ink-soft); font-weight:400;}
+  table.data.hist tr{grid-template-columns:24px auto minmax(0,1fr) auto;
+    grid-template-areas:"chk fecha tipo amt" "chk conc conc conc" "chk fuente fuente del" "chk cat cat fv";}
+  table.data.hist td:nth-child(1){grid-area:chk; align-self:start; padding-top:2px;}
+  table.data.hist td:nth-child(2){grid-area:fecha; font-size:12.5px; color:var(--ink-soft);}
+  table.data.hist td:nth-child(3){grid-area:tipo;}
+  table.data.hist td:nth-child(4){grid-area:fuente; font-size:12px; color:var(--ink-faint);}
+  table.data.hist td:nth-child(5){grid-area:conc; line-height:1.35; overflow-wrap:anywhere;}
+  table.data.hist td:nth-child(6){grid-area:cat;}
+  table.data.hist td:nth-child(7){grid-area:fv;}
+  table.data.hist td:nth-child(7) select{width:auto !important;}
+  table.data.hist td:nth-child(8){grid-area:amt; font-weight:600; font-size:14.5px;}
+  table.data.hist td:nth-child(9){grid-area:del; justify-self:end;}
+  table.data.hist td:nth-child(9) .btn{padding:3px 9px !important; font-size:11.5px !important;}
+
+  /* Ingresos */
+  table.data.ing tr{grid-template-columns:auto minmax(0,1fr) auto;
+    grid-template-areas:"fecha fuente amt" "conc conc conc" "cat act act";}
+  table.data.ing td:nth-child(1){grid-area:fecha; font-size:12.5px; color:var(--ink-soft);}
+  table.data.ing td:nth-child(2){grid-area:fuente; font-size:12px; color:var(--ink-faint);}
+  table.data.ing td:nth-child(3){grid-area:conc; line-height:1.35; overflow-wrap:anywhere;}
+  table.data.ing td:nth-child(4){grid-area:cat;}
+  table.data.ing td:nth-child(5){grid-area:amt; font-weight:600;}
+  table.data.ing td:nth-child(6){grid-area:act; justify-self:end;}
+
+  /* Eventos puntuales */
+  table.data.evt tr{grid-template-columns:auto minmax(0,1fr) auto; grid-template-areas:"fecha fuente amt" "conc conc del";}
+  table.data.evt td:nth-child(1){grid-area:fecha; font-size:12.5px; color:var(--ink-soft);}
+  table.data.evt td:nth-child(2){grid-area:fuente; font-size:12px; color:var(--ink-faint);}
+  table.data.evt td:nth-child(3){grid-area:conc; overflow-wrap:anywhere;}
+  table.data.evt td:nth-child(4){grid-area:amt; font-weight:600;}
+  table.data.evt td:nth-child(5){grid-area:del;}
+  .evt-rename{max-width:100%; min-width:0; flex:1 1 100%;}
+
+  /* Proyecciones · detalle mes a mes: balance y acumulado arriba, a la vista */
+  table.data.proy tr{grid-template-columns:repeat(4, minmax(0,1fr));
+    grid-template-areas:"mes mes bal acum" "ing gas ev reset";}
+  table.data.proy .cell-mes{grid-area:mes; font-size:15px; font-weight:600; align-self:center;}
+  table.data.proy .cell-balance{grid-area:bal;}
+  table.data.proy .cell-acumulado{grid-area:acum;}
+  table.data.proy .cell-ing{grid-area:ing;}
+  table.data.proy .cell-gas{grid-area:gas;}
+  table.data.proy .cell-eventos{grid-area:ev; align-self:end; padding-bottom:8px;}
+  table.data.proy .cell-reset{grid-area:reset; align-self:end; justify-self:end;}
+  table.data.proy td.amt{text-align:left;}
+  table.data.proy input{text-align:right;}
+
+  /* Proyecciones · eventos futuros: formulario en 2 columnas */
+  table.data.ef tr{grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:10px 10px; padding:14px 0;}
+  table.data.ef td:nth-child(1){grid-column:1 / -1;}
+  table.data.ef td:nth-child(9){align-self:end; justify-self:end;}
+  table.data.ef td.amt{text-align:left;}
+
+  /* Proyecciones · base por categoría: cabe como tabla si se aprieta */
+  table.data.cb{min-width:0; font-size:13px;}
+  table.data.cb th, table.data.cb td{padding:7px 5px;}
+  table.data.cb th{white-space:normal;}
+  table.data.cb input{width:84px !important; font-size:16px !important; padding:5px 6px !important;}
+  table.data.cb .btn{padding:4px 7px !important;}
+
+  /* Barra de acciones masivas del Histórico */
+  #bulk-bar{display:grid !important; grid-template-columns:1fr auto; gap:8px;}
+  #bulk-bar[style*="display: none"], #bulk-bar[style*="display:none"]{display:none !important;}
+  #bulk-bar #bulk-count{grid-column:1 / -1;}
+  #bulk-bar select{width:100%; min-width:0;}
+  #bulk-bar #bulk-mark-evento, #bulk-bar #bulk-delete{grid-column:auto;}
+}
+
+/* ---------- ESCENARIOS ---------- */
+.esc-block{border:1px solid var(--line); background:var(--paper-raised); padding:14px 16px 6px; margin-bottom:28px;}
+.esc-block .block-head{margin-bottom:10px;}
+.esc-controls{margin-bottom:8px;}
+.esc-controls select{min-width:220px; max-width:100%;}
+.esc-controls .btn:disabled{opacity:.4; cursor:default;}
+#esc-status{font-size:12.5px;}
+#esc-status[data-state="dirty"]{color:var(--gold);}
+#esc-status[data-state="clean"]{color:var(--accent-fixed);}
+.esc-help{font-size:12.5px; color:var(--ink-faint); margin:0 0 8px; line-height:1.45;}
+/* ---------- DIÁLOGO ---------- */
+#dlg{position:fixed; inset:0; background:rgba(0,0,0,.35); display:flex; align-items:center; justify-content:center; z-index:200; padding:16px;}
+.dlg-box{background:var(--paper-raised); border:1px solid var(--line); max-width:440px; width:100%; padding:20px 20px 16px; box-shadow:0 12px 32px rgba(0,0,0,.25);}
+.dlg-msg{margin:0 0 14px; font-size:15px; line-height:1.5; color:var(--ink);}
+.dlg-input{width:100%; font-family:var(--serif); font-size:16px; padding:9px 10px; border:1px solid var(--line); background:var(--paper); color:var(--ink); margin-bottom:14px; border-radius:var(--radius);}
+.dlg-actions{display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap;}
+.dlg-actions .btn{padding:9px 16px; font-size:14px;}
+.dlg-danger{background:var(--wine) !important; color:var(--paper) !important; border-color:var(--wine) !important;}
+@media (max-width:640px){
+  .esc-block{padding:12px 12px 4px;}
+  .esc-controls{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+  .esc-controls select{grid-column:1 / -1; min-width:0; width:100%; font-size:16px;}
+}
+
+footer.pagefoot{margin-top:60px; padding-top:16px; border-top:1px solid var(--line-soft); font-size:12px; color:var(--ink-faint);}
+</style>
+</head>
+<body>
+
+<div id="upload-screen">
+  <div id="upload-box">
+    <div class="mark">FINANZAS CASA</div>
+    <h1>Abrir datos</h1>
+    <p>Abre el fichero más reciente de la carpeta <b>Finanzas Casa</b> de Google Drive (se llama <span class="mono">finanzas_casa_AAAA-MM-DD_HHMM.json</span>). En el móvil, al pulsar el botón elige <b>Drive</b> en el selector de archivos. Los cambios se guardan solos en este dispositivo; cuando termines, pulsa <b>Guardar en Drive</b> para que el otro también los vea.</p>
+    <label for="fileinput" class="btn upload-main-btn">Abrir fichero de Drive</label>
+    <div id="drop">
+      También puedes arrastrarlo aquí. Admite el <span class="mono">.json</span> guardado desde la app, el consolidado original o su <span class="mono">.xlsx</span>.
+      <input type="file" id="fileinput" accept="application/json,.json,text/plain,.txt,.xlsx">
+    </div>
+    <a href="#" id="upload-back" style="display:none; font-size:13px;">← Volver a los datos que ya tenía abiertos</a>
+    <div id="upload-error"></div>
+    <div id="upload-status"></div>
+  </div>
+</div>
+
+<div id="app" style="display:none;">
+  <div id="mobilebar">
+    <div class="mb-row">
+      <h1>Finanzas Casa</h1>
+      <span id="mobile-sync-dot" aria-hidden="true"></span>
+      <button class="btn drive-save-btn mb-save">Guardar en Drive</button>
+      <button id="mobile-menu-btn" class="btn secondary mb-menu" aria-label="Más opciones" aria-expanded="false">⋯</button>
+    </div>
+    <select id="mobilenav" aria-label="Sección"></select>
+    <div id="mobile-menu" hidden>
+      <div id="mobile-sync-text"></div>
+      <button class="open-other-btn">Abrir fichero de Drive</button>
+      <button class="clear-storage-btn">Borrar datos guardados en este dispositivo</button>
+    </div>
+  </div>
+  <div id="sidebar">
+    <div id="brand">
+      <div class="mark">FINANZAS CASA · v1</div>
+      <h1>Cuentas de la familia</h1>
+    </div>
+    <nav id="navlist"></nav>
+    <div id="sidebar-foot">
+      <div id="sync-status"></div>
+      <button class="btn drive-save-btn side-save">Guardar en Drive</button>
+      <button class="open-other-btn">Abrir fichero de Drive</button>
+      <button class="clear-storage-btn">Borrar datos guardados aquí</button>
+    </div>
+  </div>
+  <div id="main">
+
+    <div class="view" id="view-resumen">
+      <h2 class="pagetitle">Resumen</h2>
+      <p class="pagesub">Vista general del periodo cargado: ingresos, gastos y si el balance es positivo o negativo. Los eventos puntuales pueden excluirse para ver el día a día sin distorsiones.</p>
+      <div class="controls">
+        <label class="chk"><input type="checkbox" id="chk-excl-eventos"> Excluir eventos puntuales</label>
+        <select id="p-resumen-anio"></select>
+        <select id="p-resumen-ptipo">
+          <option value="anio">Año completo</option>
+          <option value="semestre">Semestre</option>
+          <option value="trimestre">Trimestre</option>
+          <option value="mes">Mes</option>
+        </select>
+        <select id="p-resumen-pval"></select>
+      </div>
+      <div class="kpi-row" id="kpi-row"></div>
+      <p id="resumen-nomina-note" style="color:var(--ink-faint); font-size:12px; margin:-10px 0 18px;"></p>
+      <div class="callout"><b>Nota sobre ingresos:</b> incluyen las nóminas que entran en las cuentas cargadas y las aportaciones identificadas por patrón (traspasos entrantes a la cuenta común/ahorro sin salida equivalente en las cuentas propias). Si algo no encaja, revisa "Otros ingresos" en Categorías.</div>
+      <div class="two-col">
+        <div class="block">
+          <div class="block-head"><h3>Top categorías de gasto</h3></div>
+          <div class="barlist" id="top-categorias"></div>
+        </div>
+        <div class="block">
+          <div class="block-head"><h3>Fijo vs. variable</h3></div>
+          <div id="fijo-variable-box"></div>
+        </div>
+      </div>
+      <div class="block">
+        <div class="block-head"><h3>Ingresos vs. gastos</h3><span class="note">barras: ingresos y gastos · línea: balance</span></div>
+        <div class="chart-wrap"><canvas id="chart-resumen-mensual"></canvas></div>
+      </div>
+    </div>
+
+    <div class="view" id="view-ingresos">
+      <h2 class="pagetitle">Ingresos</h2>
+      <p class="pagesub">Todo lo que entra en las cuentas: nóminas y aportaciones identificadas por patrón.</p>
+      <div class="controls">
+        <select id="p-ing-anio"></select>
+        <select id="p-ing-ptipo">
+          <option value="anio">Año completo</option>
+          <option value="semestre">Semestre</option>
+          <option value="trimestre">Trimestre</option>
+          <option value="mes">Mes</option>
+        </select>
+        <select id="p-ing-pval"></select>
+        <select id="sel-cat-ing"></select>
+      </div>
+      <div class="kpi-row" id="ing-kpi-row"></div>
+      <div class="block">
+        <div class="block-head"><h3>Por fuente</h3></div>
+        <div class="barlist" id="ing-fuente-list"></div>
+      </div>
+      <div class="block">
+        <div class="block-head"><h3>Evolución mensual</h3></div>
+        <div class="chart-wrap"><canvas id="chart-ingresos-mensual"></canvas></div>
+      </div>
+      <div class="block">
+        <div class="block-head"><h3>Movimientos</h3></div>
+        <div id="ing-table-wrap"></div>
+      </div>
+    </div>
+
+    <div class="view" id="view-historico">
+      <h2 class="pagetitle">Histórico</h2>
+      <p class="pagesub">Todos los movimientos: gastos, ingresos y traspasos internos. Corrige categoría, fijo/variable, o elimina entradas directamente en la tabla.</p>
+      <div class="field-grid" id="hist-filters"></div>
+      <div class="controls">
+        <label class="chk"><input type="checkbox" id="chk-excl-eventos-hist"> Excluir eventos puntuales</label>
+        <span class="note mono" id="hist-count" style="color:var(--ink-faint); font-size:12.5px;"></span>
+        <button class="btn secondary" id="btn-clear-filters">Limpiar filtros y selección</button>
+        <button class="btn secondary" id="btn-manage-cats">Gestionar categorías</button>
+        <button class="btn secondary" id="btn-import-extracto">Importar extracto nuevo</button>
+      </div>
+      <div id="cat-manage-panel" style="display:none;"></div>
+      <div id="import-extracto-panel" style="display:none;"></div>
+      <div class="controls" id="bulk-bar" style="display:none; background:var(--paper-raised); border:1px solid var(--gold); padding:10px 14px;">
+        <span class="note mono" id="bulk-count"></span>
+        <select id="bulk-cat-select"></select>
+        <button class="btn secondary" id="bulk-apply-cat">Aplicar categoría</button>
+        <select id="bulk-fv-select">
+          <option value="Fijo">Fijo</option>
+          <option value="Variable">Variable</option>
+        </select>
+        <button class="btn secondary" id="bulk-apply-fv">Aplicar fijo/variable</button>
+        <button class="btn secondary" id="bulk-mark-evento">Marcar como evento</button>
+        <button class="btn danger" id="bulk-delete">Eliminar seleccionadas</button>
+      </div>
+      <div class="controls" id="export-controls">
+        <span class="note" id="edit-count" style="color:var(--gold); font-size:12.5px;"></span>
+        <button class="btn secondary" id="btn-export-json" title="Solo los movimientos. Para movimientos + escenarios usa «Guardar en Drive».">Exportar JSON corregido (solo movimientos)</button>
+        <button class="btn secondary" id="btn-export-xlsx">Exportar Excel corregido</button>
+      </div>
+      <div id="hist-table-wrap"></div>
+    </div>
+
+    <div class="view" id="view-categorias">
+      <h2 class="pagetitle">Categorías</h2>
+      <p class="pagesub">Ingresos primero, luego desglose de gasto por categoría con evolución a lo largo del tiempo.</p>
+      <div class="controls">
+        <select id="p-cat-anio"></select>
+        <select id="p-cat-ptipo">
+          <option value="anio">Año completo</option>
+          <option value="semestre">Semestre</option>
+          <option value="trimestre">Trimestre</option>
+          <option value="mes">Mes</option>
+        </select>
+        <select id="p-cat-pval"></select>
+        <label class="chk"><input type="checkbox" id="chk-excl-eventos-cat"> Excluir eventos puntuales</label>
+      </div>
+      <div class="block">
+        <div class="block-head"><h3>Ingresos</h3><span class="note" id="cat-ingresos-total"></span></div>
+        <div class="callout" style="margin-bottom:14px;"><b>Nota:</b> algunas aportaciones se identifican por patrón (nombre, "nómina", importes habituales), no desde una cuenta cargada directamente. "Otros ingresos" son entradas sin etiqueta clara — revísalas en Histórico si quieres reclasificarlas.</div>
+        <div class="barlist" id="cat-ingresos-list"></div>
+      </div>
+      <div class="block">
+        <div class="block-head"><h3>Gasto por categoría</h3></div>
+        <div class="barlist" id="cat-full-list"></div>
+      </div>
+      <div class="block">
+        <div class="block-head"><h3 id="cat-detail-title">Selecciona una categoría</h3></div>
+        <div class="chart-wrap"><canvas id="chart-cat-detail"></canvas></div>
+      </div>
+    </div>
+
+    <div class="view" id="view-graficos">
+      <h2 class="pagetitle">Gráficos</h2>
+      <p class="pagesub">Vistas tipo informe: reparto por categoría, comparativa anual y por fuente.</p>
+      <div class="controls">
+        <select id="p-graf-anio"></select>
+        <select id="p-graf-ptipo">
+          <option value="anio">Año completo</option>
+          <option value="semestre">Semestre</option>
+          <option value="trimestre">Trimestre</option>
+          <option value="mes">Mes</option>
+        </select>
+        <select id="p-graf-pval"></select>
+        <label class="chk"><input type="checkbox" id="chk-excl-eventos-graf"> Excluir eventos puntuales</label>
+      </div>
+      <div class="two-col">
+        <div class="block">
+          <div class="block-head"><h3>Gasto por categoría</h3></div>
+          <div class="chart-wrap" style="height:340px;"><canvas id="chart-donut-categoria"></canvas></div>
+        </div>
+        <div class="block">
+          <div class="block-head"><h3>Fijo vs. variable</h3></div>
+          <div class="chart-wrap" style="height:340px;"><canvas id="chart-donut-fv"></canvas></div>
+        </div>
+      </div>
+      <div class="block">
+        <div class="block-head"><h3>Evolución anual</h3></div>
+        <div class="chart-wrap"><canvas id="chart-bar-anual"></canvas></div>
+      </div>
+      <div class="block">
+        <div class="block-head"><h3>Gasto por fuente</h3></div>
+        <div class="chart-wrap"><canvas id="chart-bar-fuente"></canvas></div>
+      </div>
+    </div>
+
+    <div class="view" id="view-eventos">
+      <h2 class="pagetitle">Eventos puntuales</h2>
+      <p class="pagesub">Gastos grandes y no recurrentes (obra, coche, empleada de hogar…) que se marcan aparte para no distorsionar las medias mensuales normales.</p>
+      <div id="eventos-list"></div>
+    </div>
+
+    <div class="view" id="view-proyecciones">
+      <h2 class="pagetitle">Proyecciones</h2>
+      <p class="pagesub">Lo esencial: ¿los ingresos van a cubrir los gastos? Ajusta ingresos y gastos mes a mes para ver si el balance queda en positivo o en negativo.</p>
+
+      <div class="block esc-block">
+        <div class="block-head"><h3>Escenario</h3><span class="note" id="esc-status"></span></div>
+        <div class="controls esc-controls">
+          <select id="esc-select" aria-label="Escenario"></select>
+          <button class="btn secondary" id="esc-save-new">Guardar como nuevo</button>
+          <button class="btn secondary" id="esc-update">Guardar cambios</button>
+          <button class="btn secondary" id="esc-rename">Renombrar</button>
+          <button class="btn danger" id="esc-delete">Eliminar</button>
+        </div>
+        <p class="esc-help">Guarda variantes con nombre (por ejemplo «Base», «Menos ingresos», «Coche nuevo 2027») y cambia entre ellas. Todas viajan en el mismo fichero que los movimientos al pulsar <b>Guardar en Drive</b>.</p>
+      </div>
+
+      <div class="kpi-row" id="proy-kpi-row"></div>
+      <div class="callout"><b>Ingreso base:</b> incluye las nóminas y las aportaciones identificadas por patrón en las cuentas comunes. Si algún mes concreto no cuadra (por ejemplo, un mes sin una de las nóminas), ajústalo directamente en la tabla de "Detalle mes a mes" más abajo.</div>
+
+      <div class="block">
+        <div class="block-head">
+          <h3>Balance proyectado</h3>
+          <span class="note">barras: ingresos y gastos · línea: balance</span>
+        </div>
+        <div class="controls">
+          <label style="font-size:12.5px; color:var(--ink-soft);">Ver en el gráfico:</label>
+          <select id="sel-chart-horizonte">
+            <option value="3">Próximos 3 meses</option>
+            <option value="6" selected>Próximos 6 meses</option>
+            <option value="12">Próximos 12 meses</option>
+            <option value="0">Todo el horizonte</option>
+          </select>
+        </div>
+        <div class="chart-wrap"><canvas id="chart-proyeccion"></canvas></div>
+      </div>
+
+      <div class="block">
+        <div class="block-head"><h3>Gasto proyectado por categoría</h3></div>
+        <div class="chart-wrap" style="height:320px;"><canvas id="chart-proyeccion-donut"></canvas></div>
+      </div>
+
+      <div class="block">
+        <div class="block-head"><h3>Horizonte</h3></div>
+        <div class="slider-row">
+          <input type="range" id="horizonte-slider" min="1" max="36" value="12">
+          <div class="sval"><span id="horizonte-val">12</span> meses</div>
+        </div>
+        <div class="field-grid">
+          <div>
+            <label>Base de cálculo (últimos N meses)</label>
+            <select id="sel-base-meses">
+              <option value="3">3 meses</option>
+              <option value="6" selected>6 meses</option>
+              <option value="12">12 meses</option>
+            </select>
+          </div>
+          <div>
+            <label>Ingreso mensual estimado (€)</label>
+            <input type="number" id="ingreso-base-input" step="10">
+          </div>
+        </div>
+      </div>
+
+      <div class="block" id="proy-mes-focus-block" style="display:none;">
+        <div class="block-head"><h3 id="proy-mes-focus-title">Mes seleccionado</h3><button class="btn secondary" id="btn-cerrar-mes-focus">Cerrar</button></div>
+        <div class="kpi-row" id="proy-mes-focus-kpi"></div>
+      </div>
+
+      <div class="block">
+        <div class="block-head"><h3>Detalle mes a mes</h3></div>
+        <p class="pagesub" style="margin-bottom:14px;">Edita directamente el ingreso o el gasto de un mes concreto para ese mes en particular (por ejemplo, una paga extra o un mes de menos ingresos). Haz clic en una fila para ver solo ese mes en detalle. El resto de meses siguen usando la base general.</p>
+        <div id="proy-table-wrap"></div>
+      </div>
+
+      <div class="block">
+        <div class="block-head">
+          <h3>Base mensual de gasto por categoría</h3>
+          <button class="btn secondary" id="btn-reset-cat-base">Restablecer todas a la media</button>
+        </div>
+        <p class="pagesub" style="margin-bottom:14px;">Media de los últimos meses reales por categoría (sin eventos puntuales, y sin descuentos de nómina — ya están reflejados en tu ingreso neto, así que no restan aquí para no duplicar el gasto; en Categorías sí los verás incluidos). Edita cualquier valor para ajustar la base general — por ejemplo, si sabes que el supermercado va a subir o que un seguro se ha cancelado. Si necesitas anticipar un gasto nuevo que todavía no tiene historial (como una empleada de hogar que empieza ahora), añádelo con el desplegable de abajo.</p>
+        <div id="cat-base-list"></div>
+      </div>
+
+      <div class="block">
+        <div class="block-head">
+          <h3>Eventos futuros manuales</h3>
+          <button class="btn secondary" id="btn-add-evento">+ Añadir evento</button>
+        </div>
+        <p class="pagesub" style="margin-bottom:14px;">Por ejemplo: "sube la hipoteca en enero", "empieza una extraescolar". Se suman al gasto del mes que indiques.</p>
+        <div id="eventos-futuros-list"></div>
+      </div>
+
+      <div class="block">
+        <div class="block-head"><h3>Guardar y exportar</h3></div>
+        <p class="pagesub" style="margin-bottom:14px;"><b>Un único JSON con todo:</b> movimientos consolidados + todos los escenarios guardados + el escenario en el que estás trabajando. Es el mismo fichero que genera "Guardar en Drive" y el que se abre al entrar. Aparte, puedes exportar solo el escenario actual, importar escenarios de otro fichero (uno suelto o todos los de otro JSON completo) o exportar la proyección calculada.</p>
+        <div class="controls">
+          <button class="btn drive-save-btn" id="btn-guardar-todo">Guardar todo en un JSON</button>
+          <button class="btn secondary" id="btn-guardar-escenario">Exportar solo este escenario</button>
+          <label class="btn secondary" style="position:relative;">Importar escenarios
+            <input type="file" id="cargar-escenario-input" accept="application/json,.json,text/plain,.txt" style="position:absolute; inset:0; opacity:0; cursor:pointer;">
+          </label>
+          <button class="btn secondary" id="btn-export-proyeccion-csv">Exportar proyección (.csv)</button>
+        </div>
+      </div>
+    </div>
+
+    <footer class="pagefoot">Finanzas Casa · los datos viven en este dispositivo y en tu carpeta de Drive; la app no los envía a ningún servidor</footer>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+(function(){
+"use strict";
+
+let DATA = null; // {metadata, movimientos}
+let MOV = [];    // parsed movimientos with Date objects
+let EVENTOS_FUTUROS = []; // {id, nombre, mes (YYYY-MM), importe, categoria}
+let CAT_BASE_OVERRIDES = {}; // {categoria: importe} — user edits to the projected monthly base
+let CHARTS = {};
+
+const CATEGORY_COLORS = {
+  'Supermercado/Alimentación':'#3D6B5F','Cajero/Efectivo':'#A9822E','Salud':'#8C3B3B',
+  'Viajes/Hoteles':'#4B6660','Gasolina':'#6E5A2E','Deporte':'#3D6B5F','Amazon':'#8A6D3B',
+  'Ropa/Moda':'#B97575','PayPal':'#4B6660','Restaurantes/Cafeterías':'#A9822E',
+  'Farmacia':'#8C3B3B','Suscripciones digitales':'#6E827B','Suscripciones':'#4B6660','Peluquería/Estética':'#B97575',
+  'Transporte urbano':'#4B6660','Hogar/Compras online':'#8A6D3B','Multas/DGT':'#8C3B3B',
+  'Colegio/Extraescolares':'#3D6B5F','Guarderías':'#3D6B5F','Comunidad/Vivienda':'#6E827B',
+  'Préstamos/Crédito':'#1F3B36','Seguros':'#4B6660','Luz':'#A9822E','Telefonía/Internet':'#6E827B',
+  'Seguridad Social':'#8A9C97','Impuestos':'#8C3B3B','Empleada del hogar':'#B97575','Otros':'#8A9C97'
+};
+function catColor(c){ return c===PENDING_CATEGORY ? '#8C3B3B' : (CATEGORY_COLORS[c] || '#8A9C97'); }
+const PENDING_CATEGORY = 'Sin categorizar';
+let CATEGORY_LIST = Object.keys(CATEGORY_COLORS).slice(); // mutable: user can add/remove
+function allCategories(){ return CATEGORY_LIST.slice().sort((a,b)=>a.localeCompare(b,'es')); }
+const FIJOS_DISPLAY = new Set(['Préstamos/Crédito','Comunidad/Vivienda','Colegio/Extraescolares',
+  'Guarderías','Seguros','Luz','Telefonía/Internet','Seguridad Social','Suscripciones digitales','Suscripciones']);
+
+function tipoOf(m){
+  if(m.categoria === 'INGRESO') return 'Ingreso';
+  if(m.incluir_en_gasto) return 'Gasto';
+  return 'Interno';
+}
+const INTERNAL_LABELS = {
+  'EXCLUIR_TRASPASO_INTERNO':'Traspaso interno (reconciliado)',
+  'EXCLUIR_PAGO_TARJETA':'Pago de tarjeta (ya contado vía tarjeta)',
+  'EXCLUIR_RECIBO':'Recibo mes anterior (no es gasto)',
+  'EXCLUIR_INGRESO':'Ingreso desde cuenta (no es gasto)',
+  'EXCLUIR_TRASPASO_SIN_RECONCILIAR':'Traspaso interno sin reconciliar',
+  'EXCLUIR_CAJERO_TARJETA':'Cajero vía tarjeta (excluido, ver regla de efectivo)',
+  'INVERSION':'Inversión (fondos/acciones)',
+  'EXCLUIR_ANOMALIA_NO_GASTO':'Anomalía excluida',
+  'EXCLUIR_INVERSION':'Inversión (traspaso)'
+};
+function displayCategoria(m){
+  if(m.categoria === 'INGRESO') return 'Ingreso';
+  if(m.incluir_en_gasto) return m.categoria;
+  return INTERNAL_LABELS[m.categoria] || m.categoria;
+}
+
+const fmtEUR = (n) => {
+  const sign = n < 0 ? '-' : '';
+  return sign + Math.abs(n).toLocaleString('es-ES', {minimumFractionDigits:0, maximumFractionDigits:0}) + ' €';
+};
+const fmtEURDec = (n) => {
+  const sign = n < 0 ? '-' : '';
+  return sign + Math.abs(n).toLocaleString('es-ES', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' €';
+};
+
+function monthKey(d){ return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'); }
+function monthLabel(key){
+  const [y,m] = key.split('-');
+  const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  return meses[parseInt(m,10)-1] + ' ' + y.slice(2);
+}
+
+// ---------- LOAD ----------
+function parseData(json){
+  DATA = json;
+  MOV = (json.movimientos || []).map(m => {
+    const d = m.fecha_iso ? new Date(m.fecha_iso + 'T00:00:00') : new Date();
+    const mov = Object.assign({}, m, {_date: d, _month: monthKey(d), _year: d.getFullYear()});
+    if(mov.categoria === 'INGRESO' && !mov.categoria_ingreso){
+      mov.categoria_ingreso = autoIngresoCategoria(mov);
+    }
+    return mov;
+  });
+  MOV.sort((a,b) => a._date - b._date);
+}
+
+function gastoRows(opts){
+  opts = opts || {};
+  return MOV.filter(m => {
+    if(!m.incluir_en_gasto) return false;
+    // Para el balance/viabilidad real, los descuentos de nómina (seguro médico, ticket
+    // restaurante, ticket guardería) no deben restar: ya están reflejados en un ingreso neto
+    // más bajo, así que contarlos aquí también sería duplicar el gasto. Se excluyen solo
+    // cuando el llamador pide explícitamente la cifra "para balance"; el resto de vistas
+    // (Categorías, Gráficos) los siguen incluyendo para mostrar el gasto real por categoría.
+    if(opts.paraBalance && m.fuente === 'nomina_typsa') return false;
+    if(opts.exclEventos && m.es_evento_puntual) return false;
+    if(opts.anio && m._year !== opts.anio) return false;
+    if(opts.mes && m._month !== opts.mes) return false;
+    if(opts.mesesIn && !opts.mesesIn.includes(m._month)) return false;
+    if(opts.fuente && m.fuente !== opts.fuente) return false;
+    if(opts.categoria && m.categoria !== opts.categoria) return false;
+    if(opts.fijoVariable && m.fijo_variable !== opts.fijoVariable) return false;
+    if(opts.desde && m._date < opts.desde) return false;
+    if(opts.hasta && m._date > opts.hasta) return false;
+    return true;
+  });
+}
+
+function ingresoRows(opts){
+  opts = opts || {};
+  return MOV.filter(m => {
+    if(m.categoria !== 'INGRESO') return false;
+    if(opts.anio && m._year !== opts.anio) return false;
+    if(opts.mes && m._month !== opts.mes) return false;
+    if(opts.mesesIn && !opts.mesesIn.includes(m._month)) return false;
+    if(opts.fuente && m.fuente !== opts.fuente) return false;
+    if(opts.categoriaIngreso && m.categoria_ingreso !== opts.categoriaIngreso) return false;
+    return true;
+  });
+}
+
+function stripAccents(s){
+  return (s||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'');
+}
+const INGRESO_CATEGORIES = ['Nóminas','Extras','De ahorro','Otros'];
+function ingresoCategoriesSorted(){ return INGRESO_CATEGORIES.slice().sort((a,b)=>a.localeCompare(b,'es')); }
+function autoIngresoCategoria(r){
+  if(r.fuente === 'cuenta_ahorro') return 'De ahorro';
+  const c = stripAccents((r.observaciones||'') + ' ' + (r.concepto||'') + ' ' + (r.movimiento||'')).toLowerCase();
+  if(c.includes('extra')) return 'Extras';
+  if(c.includes('nomina') || c.includes('nomkna') || c.includes('marta') || c.includes('pension')) return 'Nóminas';
+  return 'Otros';
+}
+
+function sum(rows){ return rows.reduce((a,r)=>a+Math.abs(r.importe),0); }
+
+function years(){
+  const ys = new Set(MOV.map(m=>m._year));
+  return Array.from(ys).sort();
+}
+
+// All months that exist in the data, narrowed to a specific year and/or month if given.
+// Used so charts reflect exactly the same Año/Mes filter as the rest of the view,
+// instead of silently always showing the full history.
+function monthsInScope(anio, mes){
+  if(mes) return [mes];
+  const allMonths = Array.from(new Set(MOV.map(m=>m._month))).sort();
+  if(anio) return allMonths.filter(mk => mk.startsWith(String(anio)));
+  return allMonths;
+}
+
+// ---------- PERIODO (año / semestre / trimestre / mes) ----------
+const QUARTERS = {Q1:[1,2,3], Q2:[4,5,6], Q3:[7,8,9], Q4:[10,11,12]};
+const SEMESTERS = {S1:[1,2,3,4,5,6], S2:[7,8,9,10,11,12]};
+const QUARTER_LABELS = {Q1:'T1 (ene-mar)', Q2:'T2 (abr-jun)', Q3:'T3 (jul-sep)', Q4:'T4 (oct-dic)'};
+const SEMESTER_LABELS = {S1:'1er semestre (ene-jun)', S2:'2º semestre (jul-dic)'};
+
+function monthsForPeriod(anio, tipo, valor){
+  const monthsInYear = Array.from(new Set(MOV.filter(m=>m._year===anio).map(m=>m._month))).sort();
+  if(tipo === 'mes') return valor ? [valor] : monthsInYear;
+  if(tipo === 'trimestre' && valor) return QUARTERS[valor].map(n=>`${anio}-${String(n).padStart(2,'0')}`).filter(mk=>monthsInYear.includes(mk));
+  if(tipo === 'semestre' && valor) return SEMESTERS[valor].map(n=>`${anio}-${String(n).padStart(2,'0')}`).filter(mk=>monthsInYear.includes(mk));
+  return monthsInYear;
+}
+
+function initPeriodSelectors(prefix, onChange){
+  const selAnio = document.getElementById(`p-${prefix}-anio`);
+  const selTipo = document.getElementById(`p-${prefix}-ptipo`);
+  const selVal = document.getElementById(`p-${prefix}-pval`);
+  populateYearSelect(selAnio, true);
+
+  function refreshValOptions(){
+    const anio = selAnio.value ? parseInt(selAnio.value,10) : null;
+    const tipo = selTipo.value;
+    selVal.innerHTML = '';
+    selTipo.disabled = !anio;
+    selVal.disabled = !anio || tipo === 'anio';
+    if(!anio) return;
+    if(tipo === 'semestre'){
+      ['S1','S2'].forEach(s => { const o=document.createElement('option'); o.value=s; o.textContent=SEMESTER_LABELS[s]; selVal.appendChild(o); });
+    } else if(tipo === 'trimestre'){
+      ['Q1','Q2','Q3','Q4'].forEach(q => { const o=document.createElement('option'); o.value=q; o.textContent=QUARTER_LABELS[q]; selVal.appendChild(o); });
+    } else if(tipo === 'mes'){
+      const monthsInYear = Array.from(new Set(MOV.filter(m=>m._year===anio).map(m=>m._month))).sort();
+      monthsInYear.forEach(mk => { const o=document.createElement('option'); o.value=mk; o.textContent=monthLabel(mk); selVal.appendChild(o); });
+    }
+  }
+  selAnio.addEventListener('change', () => { refreshValOptions(); onChange(); });
+  selTipo.addEventListener('change', () => { refreshValOptions(); onChange(); });
+  selVal.addEventListener('change', onChange);
+  refreshValOptions();
+}
+
+// Returns {anio, mes, months, single} for the current state of a period widget.
+// `months` is the explicit list of month-keys in scope (empty selectors = todo el historial).
+// `single` is true only when the scope resolves to exactly one month (day-level charting kicks in).
+function getPeriodScope(prefix){
+  const selAnio = document.getElementById(`p-${prefix}-anio`);
+  const selTipo = document.getElementById(`p-${prefix}-ptipo`);
+  const selVal = document.getElementById(`p-${prefix}-pval`);
+  const anio = selAnio.value ? parseInt(selAnio.value,10) : null;
+  if(!anio) return {anio:null, mes:null, months: monthsInScope(null,null), single:false};
+  const tipo = selTipo.value;
+  const val = selVal.value || null;
+  const months = monthsForPeriod(anio, tipo, val);
+  const single = tipo === 'mes' && !!val;
+  return {anio, mes: single ? val : null, months, single};
+}
+
+// Aggregate a set of rows by day-of-month for a single month key (used when the
+// period filter narrows down to exactly one month, so the chart isn't just one flat bar).
+function groupByDay(rows, monthKey){
+  const [y,m] = monthKey.split('-').map(Number);
+  const daysInMonth = new Date(y, m, 0).getDate();
+  const data = new Array(daysInMonth).fill(0);
+  rows.forEach(r => { if(r._month === monthKey) data[r._date.getDate()-1] += Math.abs(r.importe); });
+  const labels = Array.from({length:daysInMonth}, (_,i)=>String(i+1));
+  return {labels, data};
+}
+
+// Generic filter over ALL movements (gasto + ingreso + interno) — used by Histórico.
+// Which category value a row should be filtered/grouped by, given its tipo:
+// gasto rows use their category, income rows use their income-category (más útil que
+// el literal "INGRESO"), internal rows keep their raw code (catLabel lo traduce al mostrarlo).
+function filterCategoryOf(m){
+  if(tipoOf(m) === 'Ingreso') return m.categoria_ingreso || 'Otros';
+  return m.categoria;
+}
+
+function filterMovements(opts){
+  opts = opts || {};
+  return MOV.filter(m => {
+    // Los descuentos de nómina (seguro médico, ticket restaurante, ticket guardería) no son
+    // movimientos bancarios reales — ya están reflejados en un ingreso neto más bajo. Contarlos
+    // aquí duplicaría el gasto, así que quedan fuera del Histórico (pero sí cuentan en los
+    // totales de gasto general por categoría, en Resumen/Categorías/Gráficos/Proyecciones).
+    if(m.fuente === 'nomina_typsa') return false;
+    if(opts.tipo && tipoOf(m) !== opts.tipo) return false;
+    if(opts.exclEventos && m.es_evento_puntual) return false;
+    if(opts.anio && m._year !== opts.anio) return false;
+    if(opts.mes && m._month !== opts.mes) return false;
+    if(opts.fuente && m.fuente !== opts.fuente) return false;
+    if(opts.categoria && m.categoria !== opts.categoria) return false;
+    if(opts.categoriasIn && opts.categoriasIn.size > 0 && !opts.categoriasIn.has(filterCategoryOf(m))) return false;
+    if(opts.fijoVariable && m.fijo_variable !== opts.fijoVariable) return false;
+    if(opts.search){
+      const s = opts.search.toLowerCase();
+      if(!(m.concepto||'').toLowerCase().includes(s)) return false;
+    }
+    return true;
+  });
+}
+
+// ---------- NAV ----------
+const SECTIONS = [
+  {id:'resumen', label:'Resumen'},
+  {id:'ingresos', label:'Ingresos'},
+  {id:'historico', label:'Histórico'},
+  {id:'categorias', label:'Categorías'},
+  {id:'graficos', label:'Gráficos'},
+  {id:'eventos', label:'Eventos puntuales'},
+  {id:'proyecciones', label:'Proyecciones'}
+];
+
+function setupNav(){
+  const navlist = document.getElementById('navlist');
+  const mobilenav = document.getElementById('mobilenav');
+  navlist.innerHTML = '';
+  mobilenav.innerHTML = '';
+  SECTIONS.forEach((s, i) => {
+    const btn = document.createElement('button');
+    btn.textContent = s.label;
+    btn.dataset.id = s.id;
+    if(i===0) btn.classList.add('active');
+    btn.addEventListener('click', () => showView(s.id));
+    navlist.appendChild(btn);
+
+    const opt = document.createElement('option');
+    opt.value = s.id; opt.textContent = s.label;
+    mobilenav.appendChild(opt);
+  });
+  if(!mobilenav.dataset.wired){ mobilenav.addEventListener('change', (e) => showView(e.target.value)); mobilenav.dataset.wired = '1'; }
+}
+
+let CURRENT_VIEW = 'resumen';
+function showView(id){
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + id).classList.add('active');
+  document.querySelectorAll('#navlist button').forEach(b => b.classList.toggle('active', b.dataset.id === id));
+  document.getElementById('mobilenav').value = id;
+  CURRENT_VIEW = id;
+  if(id === 'resumen') renderResumen();
+  if(id === 'ingresos') renderIngresos();
+  if(id === 'historico') renderHistorico();
+  if(id === 'categorias') renderCategorias();
+  if(id === 'graficos') renderGraficos();
+  if(id === 'eventos') renderEventos();
+  if(id === 'proyecciones') renderProyecciones();
+  persistState();
+}
+
+// ---------- RESUMEN ----------
+function populateYearSelect(sel, includeAll){
+  sel.innerHTML = '';
+  if(includeAll){
+    const o = document.createElement('option'); o.value=''; o.textContent='Todos los años';
+    sel.appendChild(o);
+  }
+  years().forEach(y => {
+    const o = document.createElement('option'); o.value=y; o.textContent=y;
+    sel.appendChild(o);
+  });
+}
+
+function populateMonthSelect(sel, anio){
+  sel.innerHTML = '';
+  const o = document.createElement('option'); o.value=''; o.textContent='Todos los meses';
+  sel.appendChild(o);
+  if(!anio){ sel.disabled = true; return; }
+  sel.disabled = false;
+  const monthsInYear = Array.from(new Set(MOV.filter(m=>m._year===anio).map(m=>m._month))).sort();
+  monthsInYear.forEach(mk => {
+    const opt = document.createElement('option'); opt.value=mk; opt.textContent=monthLabel(mk);
+    sel.appendChild(opt);
+  });
+}
+
+function renderResumen(){
+  const selAnio = document.getElementById('p-resumen-anio');
+  if(!selAnio.dataset.init){
+    initPeriodSelectors('resumen', renderResumen);
+    selAnio.dataset.init = '1';
+    document.getElementById('chk-excl-eventos').addEventListener('change', renderResumen);
+  }
+  const exclEventos = document.getElementById('chk-excl-eventos').checked;
+  const {anio, mes, months: scopeMonths} = getPeriodScope('resumen');
+  const rows = gastoRows({exclEventos, mesesIn: scopeMonths, paraBalance: true});
+  const ingresos = ingresoRows({mesesIn: scopeMonths});
+
+  const totalGasto = sum(rows);
+  const totalIngreso = sum(ingresos);
+  const balance = totalIngreso - totalGasto;
+  const fijos = sum(rows.filter(r=>r.fijo_variable==='Fijo'));
+  const variables = sum(rows.filter(r=>r.fijo_variable==='Variable'));
+  const nMonths = new Set(rows.map(r=>r._month)).size || 1;
+  const media = totalGasto / nMonths;
+  const nominaDeducciones = sum(gastoRows({exclEventos, mesesIn: scopeMonths}).filter(r=>r.fuente==='nomina_typsa'));
+
+  const periodoLabel = mes ? monthLabel(mes) : (anio ? anio : 'todo el periodo');
+  const kpiRow = document.getElementById('kpi-row');
+  kpiRow.innerHTML = `
+    <div class="kpi"><div class="label">INGRESOS</div><div class="value pos">${fmtEUR(totalIngreso)}</div><div class="sub">${periodoLabel}</div></div>
+    <div class="kpi"><div class="label">GASTOS</div><div class="value neg">${fmtEUR(totalGasto)}</div><div class="sub">media ${fmtEUR(media)}/mes</div></div>
+    <div class="kpi"><div class="label">BALANCE</div><div class="value ${balance>=0?'pos':'neg'}">${balance>=0?'+':''}${fmtEUR(balance)}</div><div class="sub">${totalIngreso? Math.round(balance/totalIngreso*100):0}% de los ingresos</div></div>
+    <div class="kpi"><div class="label">FIJO / VARIABLE</div><div class="value">${totalGasto? Math.round(fijos/totalGasto*100):0}% / ${totalGasto? Math.round(variables/totalGasto*100):0}%</div><div class="sub">${fmtEUR(fijos)} · ${fmtEUR(variables)}</div></div>
+  `;
+  document.getElementById('resumen-nomina-note').textContent = nominaDeducciones > 0
+    ? `No incluye ${fmtEUR(nominaDeducciones)} de descuentos de nómina (seguro médico, ticket restaurante, ticket guardería) — ya están reflejados en un ingreso neto más bajo, así que restarlos aquí también duplicaría el gasto. Para ver el gasto real por categoría incluyéndolos, mira Categorías.`
+    : '';
+
+  // top categorias
+  const byCat = {};
+  rows.forEach(r => { byCat[r.categoria] = (byCat[r.categoria]||0) + Math.abs(r.importe); });
+  const sorted = Object.entries(byCat).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const maxVal = sorted.length ? sorted[0][1] : 1;
+  const topCatEl = document.getElementById('top-categorias');
+  topCatEl.innerHTML = sorted.map(([cat,val]) => `
+    <div class="barrow">
+      <div class="catname" title="${cat}">${cat}</div>
+      <div class="bartrack"><div class="barfill" style="width:${(val/maxVal*100).toFixed(1)}%; background:${catColor(cat)}"></div></div>
+      <div class="val">${fmtEUR(val)}</div>
+    </div>`).join('') || '<div class="empty">Sin datos</div>';
+
+  // fijo vs variable box
+  const fvBox = document.getElementById('fijo-variable-box');
+  const fvMax = Math.max(fijos, variables) || 1;
+  fvBox.innerHTML = `
+    <div class="barlist">
+      <div class="barrow"><div class="catname">Fijo</div><div class="bartrack"><div class="barfill fixed" style="width:${(fijos/fvMax*100).toFixed(1)}%"></div></div><div class="val">${fmtEUR(fijos)}</div></div>
+      <div class="barrow"><div class="catname">Variable</div><div class="bartrack"><div class="barfill var" style="width:${(variables/fvMax*100).toFixed(1)}%"></div></div><div class="val">${fmtEUR(variables)}</div></div>
+    </div>
+  `;
+
+  // Ingresos vs Gastos vs Balance chart — respeta el filtro de periodo activo.
+  // Si el periodo se reduce a un único mes, se desglosa por día en vez de un único bloque.
+  if(scopeMonths.length === 1){
+    const mk = scopeMonths[0];
+    const g = groupByDay(gastoRows({exclEventos, paraBalance:true}), mk);
+    const i = groupByDay(ingresoRows({}), mk);
+    const balanceData = g.labels.map((_,idx)=>i.data[idx]-g.data[idx]);
+    drawComboChart('chart-resumen-mensual', g.labels,
+      [{label:'Ingresos', data: i.data, color:'#3D6B5F', type:'bar'},
+       {label:'Gastos', data: g.data, color:'#8C3B3B', type:'bar'},
+       {label:'Balance', data: balanceData, color:'#A9822E', type:'line'}]);
+  } else {
+    const monthlyGasto = {}, monthlyIngreso = {};
+    gastoRows({exclEventos, paraBalance:true}).forEach(r => { monthlyGasto[r._month] = (monthlyGasto[r._month]||0) + Math.abs(r.importe); });
+    ingresoRows({}).forEach(r => { monthlyIngreso[r._month] = (monthlyIngreso[r._month]||0) + Math.abs(r.importe); });
+    const gastoData = scopeMonths.map(m=>monthlyGasto[m]||0);
+    const ingresoData = scopeMonths.map(m=>monthlyIngreso[m]||0);
+    const balanceData = scopeMonths.map((m,idx)=>ingresoData[idx]-gastoData[idx]);
+    drawComboChart('chart-resumen-mensual', scopeMonths.map(monthLabel),
+      [{label:'Ingresos', data: ingresoData, color:'#3D6B5F', type:'bar'},
+       {label:'Gastos', data: gastoData, color:'#8C3B3B', type:'bar'},
+       {label:'Balance', data: balanceData, color:'#A9822E', type:'line'}]);
+  }
+}
+
+// ---------- INGRESOS ----------
+function renderIngresos(){
+  const selAnio = document.getElementById('p-ing-anio');
+  const selCat = document.getElementById('sel-cat-ing');
+  if(!selAnio.dataset.init){
+    initPeriodSelectors('ing', renderIngresos);
+    selCat.innerHTML = '<option value="">Todas las categorías</option>' + ingresoCategoriesSorted().map(c=>`<option value="${c}">${c}</option>`).join('');
+    selAnio.dataset.init = '1';
+    selCat.addEventListener('change', renderIngresos);
+  }
+  const {anio, mes, months: scopeMonths} = getPeriodScope('ing');
+  const categoriaIngreso = selCat.value || null;
+  const rows = ingresoRows({mesesIn: scopeMonths, categoriaIngreso}).slice().sort((a,b)=>b._date-a._date);
+  const total = sum(rows);
+  const nMonths = new Set(rows.map(r=>r._month)).size || 1;
+  const media = total / nMonths;
+
+  document.getElementById('ing-kpi-row').innerHTML = `
+    <div class="kpi"><div class="label">TOTAL INGRESOS</div><div class="value pos">${fmtEUR(total)}</div><div class="sub">${mes?monthLabel(mes):(anio||'todo el periodo')}</div></div>
+    <div class="kpi"><div class="label">MEDIA MENSUAL</div><div class="value">${fmtEUR(media)}</div><div class="sub">sobre ${nMonths} meses</div></div>
+    <div class="kpi"><div class="label">MOVIMIENTOS</div><div class="value">${rows.length}</div><div class="sub">entradas de ingreso</div></div>
+  `;
+
+  // Por categoría — usa el mismo periodo filtrado (sin el propio filtro de categoría, para comparar)
+  const rowsForBreakdown = ingresoRows({mesesIn: scopeMonths});
+  const byCat = {};
+  rowsForBreakdown.forEach(r => { byCat[r.categoria_ingreso] = (byCat[r.categoria_ingreso]||0) + Math.abs(r.importe); });
+  const sorted = INGRESO_CATEGORIES.map(c=>[c, byCat[c]||0]).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
+  const maxVal = sorted.length ? sorted[0][1] : 1;
+  document.getElementById('ing-fuente-list').innerHTML = sorted.map(([f,val]) => `
+    <div class="barrow">
+      <div class="catname" title="${f}">${f}</div>
+      <div class="bartrack"><div class="barfill" style="width:${(val/maxVal*100).toFixed(1)}%; background:#3D6B5F"></div></div>
+      <div class="val">${fmtEUR(val)}</div>
+    </div>`).join('') || '<div class="empty">Sin ingresos en este periodo</div>';
+
+  // Evolución — respeta el periodo seleccionado; si es un único mes, desglosa por día
+  if(scopeMonths.length === 1){
+    const {labels, data} = groupByDay(ingresoRows({categoriaIngreso}), scopeMonths[0]);
+    drawLineChart('chart-ingresos-mensual', labels, [{label:'Ingresos', data, color:'#3D6B5F'}]);
+  } else {
+    const monthly = {};
+    ingresoRows({categoriaIngreso}).forEach(r => { monthly[r._month] = (monthly[r._month]||0) + Math.abs(r.importe); });
+    drawLineChart('chart-ingresos-mensual', scopeMonths.map(monthLabel), [
+      {label:'Ingresos', data: scopeMonths.map(m=>monthly[m]||0), color:'#3D6B5F'}
+    ]);
+  }
+
+  const wrap = document.getElementById('ing-table-wrap');
+  if(!rows.length){
+    wrap.innerHTML = '<div class="empty">No hay ingresos con estos filtros.</div>';
+    return;
+  }
+  const MAX_SHOW = 300;
+  const shown = rows.slice(0, MAX_SHOW);
+  wrap.innerHTML = `
+    <div class="table-scroll"><table class="data wide cards ing">
+      <thead><tr><th>Fecha</th><th>Fuente cuenta</th><th>Concepto</th><th>Categoría</th><th style="text-align:right;">Importe</th><th></th></tr></thead>
+      <tbody>
+        ${shown.map(r => `
+          <tr data-rowid="${r.row_id}">
+            <td class="mono">${r.fecha}</td>
+            <td>${r.fuente}</td>
+            <td>${escapeHtml(r.concepto||'')}${r.observaciones ? ' <span style="color:var(--ink-faint); font-size:11.5px;">— '+escapeHtml(r.observaciones)+'</span>' : ''}</td>
+            <td>
+              <select class="ing-cat-select" data-rowid="${r.row_id}" style="font-family:inherit; font-size:12.5px; background:${r._edited?'var(--paper)':'var(--paper-raised)'}; border:1px solid ${r._edited?'var(--gold)':'var(--line)'}; padding:4px 6px;">
+                ${ingresoCategoriesSorted().map(c=>`<option value="${c}" ${c===r.categoria_ingreso?'selected':''}>${c}</option>`).join('')}
+              </select>
+            </td>
+            <td class="amt">${fmtEURDec(r.importe)}</td>
+            <td style="white-space:nowrap;">
+              <button class="btn secondary ing-move" style="padding:4px 8px; font-size:11px;" title="Esto no es un ingreso, moverlo a gasto pendiente de categorizar">A gasto</button>
+              <button class="btn danger ing-del" style="padding:4px 8px; font-size:11px;">Eliminar</button>
+            </td>
+          </tr>`).join('')}
+      </tbody>
+    </table></div>
+    ${rows.length > MAX_SHOW ? `<p style="color:var(--ink-faint); font-size:12.5px; margin-top:10px;">Mostrando los ${MAX_SHOW} más recientes de ${rows.length}.</p>` : ''}
+  `;
+  wrap.querySelectorAll('.ing-cat-select').forEach(sel => {
+    sel.addEventListener('change', (e) => {
+      const mov = MOV.find(m=>m.row_id===e.target.dataset.rowid);
+      if(!mov) return;
+      mov.categoria_ingreso = e.target.value;
+      mov._edited = true;
+      renderIngresos();
+    });
+  });
+  wrap.querySelectorAll('tr[data-rowid]').forEach(tr => {
+    const rowId = tr.dataset.rowid;
+    tr.querySelector('.ing-move').addEventListener('click', async () => {
+      const mov = MOV.find(m=>m.row_id===rowId);
+      if(!mov) return;
+      if(!(await askConfirm('¿Mover este movimiento a Gasto, pendiente de categorizar?', 'Mover a gasto'))) return;
+      mov.categoria = PENDING_CATEGORY;
+      mov.incluir_en_gasto = true;
+      mov.fijo_variable = 'Variable';
+      mov._edited = true;
+      renderIngresos();
+    });
+    tr.querySelector('.ing-del').addEventListener('click', async () => {
+      if(!(await askConfirm('¿Eliminar este movimiento? No se puede deshacer.', 'Eliminar', true))) return;
+      MOV = MOV.filter(m=>m.row_id!==rowId);
+      renderIngresos();
+    });
+  });
+}
+
+// ---------- HISTORICO ----------
+let SELECTED_ROWS = new Set();
+// En móvil se pintan menos filas de golpe (cada una es una tarjeta alta); "Ver más" amplía.
+const HIST_STEP = (window.matchMedia && window.matchMedia('(max-width:640px)').matches) ? 100 : 400;
+let HIST_LIMIT = HIST_STEP;
+
+let HIST_CAT_FILTER = new Set(); // vacío = todas
+
+function renderHistoricoFilters(){
+  const wrap = document.getElementById('hist-filters');
+  const fuentes = Array.from(new Set(MOV.filter(m=>m.fuente!=='nomina_typsa').map(m=>m.fuente))).sort();
+  wrap.innerHTML = `
+    <div><label>Tipo</label><select id="hf-tipo">
+      <option value="">Todos</option>
+      <option value="Gasto">Gasto</option>
+      <option value="Ingreso">Ingreso</option>
+      <option value="Interno">Interno / no contable</option>
+    </select></div>
+    <div><label>Año</label><select id="hf-anio"></select></div>
+    <div><label>Mes</label><select id="hf-mes"></select></div>
+    <div><label>Fuente</label><select id="hf-fuente"><option value="">Todas</option>${fuentes.map(f=>`<option value="${f}">${f}</option>`).join('')}</select></div>
+    <div style="position:relative;">
+      <label>Categoría</label>
+      <button type="button" id="hf-categoria-btn" class="btn secondary" style="width:100%; text-align:left; font-size:13.5px; padding:7px 10px;">Todas</button>
+      <div id="hf-categoria-panel" style="display:none; position:absolute; z-index:30; top:100%; left:0; margin-top:2px; background:var(--paper-raised); border:1px solid var(--line); padding:8px; max-height:280px; overflow-y:auto; overflow-x:hidden; width:290px; box-sizing:border-box; box-shadow:0 6px 16px rgba(0,0,0,0.18);"></div>
+    </div>
+    <div><label>Fijo/Variable</label><select id="hf-fv"><option value="">Ambos</option><option value="Fijo">Fijo</option><option value="Variable">Variable</option></select></div>
+    <div><label>Buscar concepto</label><input type="text" id="hf-search" placeholder="ej. mercadona"></div>
+  `;
+  populateYearSelect(document.getElementById('hf-anio'), true);
+  populateMonthSelect(document.getElementById('hf-mes'), null);
+  refreshHistCategoriaOptions();
+  document.getElementById('hf-anio').addEventListener('change', (e) => {
+    populateMonthSelect(document.getElementById('hf-mes'), e.target.value ? parseInt(e.target.value,10) : null);
+    renderHistoricoTable();
+  });
+  document.getElementById('hf-tipo').addEventListener('change', () => {
+    refreshHistCategoriaOptions();
+    renderHistoricoTable();
+  });
+  ['hf-mes','hf-fuente','hf-fv','hf-search'].forEach(id => {
+    document.getElementById(id).addEventListener('input', renderHistoricoTable);
+  });
+  const catBtn = document.getElementById('hf-categoria-btn');
+  const catPanel = document.getElementById('hf-categoria-panel');
+  catBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    catPanel.style.display = catPanel.style.display === 'none' ? 'block' : 'none';
+  });
+  document.addEventListener('click', (e) => {
+    const path = e.composedPath();
+    if(!path.includes(catPanel) && !path.includes(catBtn)) catPanel.style.display = 'none';
+  });
+}
+
+// The category list must only ever offer categories that actually produce results for
+// the current Tipo filter — otherwise picking one silently shows an empty table.
+function refreshHistCategoriaOptions(){
+  const tipo = document.getElementById('hf-tipo').value;
+  let cats;
+  if(tipo === 'Ingreso'){
+    cats = ingresoCategoriesSorted().filter(c => MOV.some(m=>tipoOf(m)==='Ingreso' && filterCategoryOf(m)===c));
+  } else if(tipo === 'Interno'){
+    cats = Array.from(new Set(MOV.filter(m=>tipoOf(m)==='Interno').map(m=>m.categoria))).sort();
+  } else if(tipo === 'Gasto'){
+    cats = allCategories().filter(c => MOV.some(m=>m.incluir_en_gasto && m.categoria===c));
+    if(MOV.some(m=>m.incluir_en_gasto && m.categoria===PENDING_CATEGORY)) cats.push(PENDING_CATEGORY);
+  } else {
+    cats = Array.from(new Set(MOV.map(m=>filterCategoryOf(m)))).sort((a,b)=>String(a).localeCompare(String(b),'es'));
+  }
+  // descarta selecciones que ya no son válidas para el tipo actual
+  HIST_CAT_FILTER = new Set(Array.from(HIST_CAT_FILTER).filter(c=>cats.includes(c)));
+  renderHistCategoriaPanel(cats);
+  updateHistCategoriaBtnLabel(cats);
+}
+
+function catLabel(c){ return c==='INGRESO' ? 'Ingreso' : (INTERNAL_LABELS[c]||c); }
+
+function renderHistCategoriaPanel(cats){
+  const panel = document.getElementById('hf-categoria-panel');
+  if(!panel) return;
+  panel.innerHTML = `
+    <div style="display:flex; gap:6px; margin-bottom:8px;">
+      <button type="button" id="hf-cat-all" class="btn secondary" style="padding:3px 9px; font-size:11.5px;">Todo</button>
+      <button type="button" id="hf-cat-none" class="btn secondary" style="padding:3px 9px; font-size:11.5px;">Ninguno</button>
+    </div>
+    ${cats.map(c => `
+      <label style="display:flex; align-items:flex-start; gap:7px; padding:3px 2px; font-size:13px; cursor:pointer;">
+        <input type="checkbox" class="hf-cat-check" value="${escapeHtml(c)}" ${HIST_CAT_FILTER.has(c)?'checked':''} style="margin-top:3px; flex-shrink:0; width:auto;">
+        <span style="flex:1; min-width:0; overflow-wrap:break-word; word-break:break-word;">${escapeHtml(catLabel(c))}</span>
+      </label>
+    `).join('') || '<div class="empty" style="padding:10px 0;">Sin categorías</div>'}
+  `;
+  panel.querySelectorAll('.hf-cat-check').forEach(chk => {
+    chk.addEventListener('change', (e) => {
+      if(e.target.checked) HIST_CAT_FILTER.add(e.target.value); else HIST_CAT_FILTER.delete(e.target.value);
+      updateHistCategoriaBtnLabel(cats);
+      renderHistoricoTable();
+    });
+  });
+  const allBtn = document.getElementById('hf-cat-all');
+  const noneBtn = document.getElementById('hf-cat-none');
+  if(allBtn) allBtn.addEventListener('click', () => {
+    cats.forEach(c=>HIST_CAT_FILTER.add(c));
+    renderHistCategoriaPanel(cats); updateHistCategoriaBtnLabel(cats); renderHistoricoTable();
+  });
+  if(noneBtn) noneBtn.addEventListener('click', () => {
+    HIST_CAT_FILTER.clear();
+    renderHistCategoriaPanel(cats); updateHistCategoriaBtnLabel(cats); renderHistoricoTable();
+  });
+}
+
+function updateHistCategoriaBtnLabel(cats){
+  const btn = document.getElementById('hf-categoria-btn');
+  if(!btn) return;
+  if(HIST_CAT_FILTER.size === 0 || HIST_CAT_FILTER.size === cats.length) btn.textContent = 'Todas';
+  else if(HIST_CAT_FILTER.size === 1) btn.textContent = catLabel(Array.from(HIST_CAT_FILTER)[0]);
+  else btn.textContent = `${HIST_CAT_FILTER.size} seleccionadas`;
+}
+
+function renderHistoricoTable(){
+  const tipo = document.getElementById('hf-tipo').value;
+  const anio = document.getElementById('hf-anio').value;
+  const mes = document.getElementById('hf-mes').value;
+  const fuente = document.getElementById('hf-fuente').value;
+  const fv = document.getElementById('hf-fv').value;
+  const search = document.getElementById('hf-search').value.trim();
+  const exclEventos = document.getElementById('chk-excl-eventos-hist').checked;
+
+  let rows = filterMovements({
+    tipo: tipo || null,
+    exclEventos,
+    anio: anio ? parseInt(anio,10) : null,
+    mes: mes || null,
+    fuente: fuente || null,
+    categoriasIn: HIST_CAT_FILTER,
+    fijoVariable: fv || null,
+    search: search || null
+  });
+  rows = rows.slice().sort((a,b)=> b._date - a._date);
+
+  const gastoTotal = sum(rows.filter(r=>tipoOf(r)==='Gasto'));
+  const ingresoTotal = sum(rows.filter(r=>tipoOf(r)==='Ingreso'));
+  document.getElementById('hist-count').innerHTML =
+    `${rows.length} movimientos · <span style="color:var(--wine);">Gastos: ${fmtEUR(gastoTotal)}</span> · <span style="color:var(--accent-fixed);">Ingresos: ${fmtEUR(ingresoTotal)}</span>`;
+
+  const MAX_SHOW = HIST_LIMIT;
+  const shown = rows.slice(0, MAX_SHOW);
+  const wrap = document.getElementById('hist-table-wrap');
+  if(!rows.length){
+    wrap.innerHTML = '<div class="empty">No hay movimientos con estos filtros.</div>';
+    updateBulkBar();
+    return;
+  }
+  wrap.innerHTML = `
+    <div class="table-scroll"><table class="data wide cards hist">
+      <thead><tr>
+        <th><label class="chk-all"><input type="checkbox" id="hist-check-all" ${shown.length>0 && shown.every(r=>SELECTED_ROWS.has(r.row_id))?'checked':''}><span class="m-only">Seleccionar los ${shown.length} visibles</span></label></th>
+        <th>Fecha</th><th>Tipo</th><th>Fuente</th><th>Concepto</th><th>Categoría</th><th>Fijo/Var</th>
+        <th style="text-align:right;">Importe</th><th></th>
+      </tr></thead>
+      <tbody>
+        ${shown.map(r => {
+          const t = tipoOf(r);
+          const isPending = r.categoria === PENDING_CATEGORY;
+          return `
+          <tr data-rowid="${r.row_id}" style="${isPending?'background:rgba(140,59,59,0.08);':''}">
+            <td><input type="checkbox" class="hist-check" data-rowid="${r.row_id}" ${SELECTED_ROWS.has(r.row_id)?'checked':''}></td>
+            <td class="mono">${r.fecha}</td>
+            <td><span class="tag" style="border-color:${t==='Gasto'?'var(--wine-soft)':t==='Ingreso'?'var(--accent-fixed)':'var(--ink-faint)'};">${t}</span></td>
+            <td>${r.fuente}</td>
+            <td>${escapeHtml(r.concepto||'')} ${r.es_evento_puntual?'<span class="tag evento">evento</span>':''} ${r.es_estimado?'<span class="tag estimado">estimado</span>':''} ${r.es_importado?'<span class="tag" style="border-color:var(--accent-fixed); color:var(--accent-fixed);">importado</span>':''} ${isPending?'<span class="tag evento" style="border-color:var(--wine); color:var(--wine);">sin categorizar</span>':''}</td>
+            <td>
+              ${t==='Gasto' ? `
+              <select class="hist-cat-select" data-rowid="${r.row_id}" style="font-family:inherit; font-size:12.5px; background:${r._edited?'var(--paper)':'var(--paper-raised)'}; border:1px solid ${isPending?'var(--wine)':(r._edited?'var(--gold)':'var(--line)')}; padding:4px 6px; max-width:170px;">
+                ${allCategories().concat(isPending?[PENDING_CATEGORY]:[]).map(c => `<option value="${c}" ${c===r.categoria?'selected':''}>${c}</option>`).join('')}
+              </select>` : (t==='Ingreso' ? `
+              <select class="hist-ingcat-select" data-rowid="${r.row_id}" style="font-family:inherit; font-size:12.5px; background:${r._edited?'var(--paper)':'var(--paper-raised)'}; border:1px solid ${r._edited?'var(--gold)':'var(--line)'}; padding:4px 6px;">
+                ${ingresoCategoriesSorted().map(c => `<option value="${c}" ${c===r.categoria_ingreso?'selected':''}>${c}</option>`).join('')}
+              </select>` : `<span title="${r.categoria}">${escapeHtml(displayCategoria(r))}</span>`)}
+            </td>
+            <td>
+              ${t==='Gasto' ? `
+              <select class="hist-fv-select" data-rowid="${r.row_id}" style="font-family:inherit; font-size:12.5px; background:var(--paper-raised); border:1px solid var(--line); padding:4px 6px;">
+                <option value="Fijo" ${r.fijo_variable==='Fijo'?'selected':''}>Fijo</option>
+                <option value="Variable" ${r.fijo_variable==='Variable'?'selected':''}>Variable</option>
+              </select>` : '—'}
+            </td>
+            <td class="amt ${r.importe<0?'neg':''}">${fmtEURDec(r.importe)}</td>
+            <td><button class="btn danger hist-del" data-rowid="${r.row_id}" style="padding:4px 8px; font-size:11px;">Eliminar</button></td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table></div>
+    ${rows.length > MAX_SHOW ? `<p style="color:var(--ink-faint); font-size:12.5px; margin-top:10px;">Mostrando los ${MAX_SHOW} más recientes de ${rows.length}. Filtra para ver más detalle.
+      <button class="btn secondary" id="hist-more" style="margin-left:6px;">Ver ${Math.min(HIST_STEP, rows.length-MAX_SHOW)} más</button></p>` : ''}
+  `;
+  const moreBtn = document.getElementById('hist-more');
+  if(moreBtn) moreBtn.addEventListener('click', () => { HIST_LIMIT += HIST_STEP; renderHistoricoTable(); });
+  wrap.querySelectorAll('.hist-cat-select').forEach(sel => {
+    sel.addEventListener('change', (e) => {
+      const mov = MOV.find(m => m.row_id === e.target.dataset.rowid);
+      if(!mov) return;
+      const newCat = e.target.value;
+      if(newCat !== mov.categoria){
+        mov.categoria = newCat;
+        mov.fijo_variable = FIJOS_DISPLAY.has(newCat) ? 'Fijo' : 'Variable';
+        mov._edited = true;
+      }
+      updateEditCount();
+      renderHistoricoTable();
+    });
+  });
+  wrap.querySelectorAll('.hist-ingcat-select').forEach(sel => {
+    sel.addEventListener('change', (e) => {
+      const mov = MOV.find(m => m.row_id === e.target.dataset.rowid);
+      if(!mov) return;
+      mov.categoria_ingreso = e.target.value;
+      mov._edited = true;
+      updateEditCount();
+    });
+  });
+  wrap.querySelectorAll('.hist-fv-select').forEach(sel => {
+    sel.addEventListener('change', (e) => {
+      const mov = MOV.find(m => m.row_id === e.target.dataset.rowid);
+      if(!mov) return;
+      mov.fijo_variable = e.target.value;
+      mov._edited = true;
+      updateEditCount();
+    });
+  });
+  wrap.querySelectorAll('.hist-del').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const rowId = e.currentTarget.dataset.rowid;
+      if(!(await askConfirm('¿Eliminar este movimiento? No se puede deshacer.', 'Eliminar', true))) return;
+      MOV = MOV.filter(m=>m.row_id!==rowId);
+      SELECTED_ROWS.delete(rowId);
+      renderHistoricoTable();
+    });
+  });
+  wrap.querySelectorAll('.hist-check').forEach(chk => {
+    chk.addEventListener('change', (e) => {
+      const rowId = e.target.dataset.rowid;
+      if(e.target.checked) SELECTED_ROWS.add(rowId); else SELECTED_ROWS.delete(rowId);
+      updateBulkBar();
+    });
+  });
+  const checkAll = document.getElementById('hist-check-all');
+  checkAll.addEventListener('change', (e) => {
+    shown.forEach(r => { if(e.target.checked) SELECTED_ROWS.add(r.row_id); else SELECTED_ROWS.delete(r.row_id); });
+    renderHistoricoTable();
+  });
+  updateEditCount();
+  updateBulkBar();
+}
+
+function updateBulkBar(){
+  const bar = document.getElementById('bulk-bar');
+  const n = SELECTED_ROWS.size;
+  if(n === 0){ bar.style.display = 'none'; return; }
+  bar.style.display = 'flex';
+  document.getElementById('bulk-count').textContent = `${n} seleccionadas`;
+}
+
+function updateEditCount(){
+  const n = MOV.filter(m => m._edited).length;
+  const el = document.getElementById('edit-count');
+  if(el) el.textContent = n ? `${n} entrada${n===1?'':'s'} corregida${n===1?'':'s'} (sin exportar)` : '';
+}
+
+function clearHistFiltersAndSelection(){
+  document.getElementById('hf-tipo').value = '';
+  document.getElementById('hf-anio').value = '';
+  populateMonthSelect(document.getElementById('hf-mes'), null);
+  document.getElementById('hf-fuente').value = '';
+  document.getElementById('hf-fv').value = '';
+  document.getElementById('hf-search').value = '';
+  document.getElementById('chk-excl-eventos-hist').checked = false;
+  HIST_CAT_FILTER.clear();
+  refreshHistCategoriaOptions();
+  SELECTED_ROWS.clear();
+  renderHistoricoTable();
+}
+
+function renderHistorico(){
+  if(!document.getElementById('hf-anio')){
+    renderHistoricoFilters();
+    document.getElementById('chk-excl-eventos-hist').addEventListener('change', renderHistoricoTable);
+    document.getElementById('btn-export-json').addEventListener('click', exportCorrectedJSON);
+    document.getElementById('btn-export-xlsx').addEventListener('click', exportCorrectedXLSX);
+    document.getElementById('btn-manage-cats').addEventListener('click', toggleCatManagePanel);
+    document.getElementById('btn-import-extracto').addEventListener('click', toggleImportPanel);
+    document.getElementById('btn-clear-filters').addEventListener('click', clearHistFiltersAndSelection);
+    setupBulkBar();
+  }
+  renderHistoricoTable();
+}
+
+// ---------- BULK ACTIONS ----------
+function setupBulkBar(){
+  const catSel = document.getElementById('bulk-cat-select');
+  catSel.innerHTML = allCategories().map(c=>`<option value="${c}">${c}</option>`).join('');
+
+  document.getElementById('bulk-apply-cat').addEventListener('click', () => {
+    const cat = catSel.value;
+    SELECTED_ROWS.forEach(id => {
+      const mov = MOV.find(m=>m.row_id===id);
+      if(mov && tipoOf(mov)==='Gasto'){
+        mov.categoria = cat;
+        mov.fijo_variable = FIJOS_DISPLAY.has(cat) ? 'Fijo' : 'Variable';
+        mov._edited = true;
+      }
+    });
+    renderHistoricoTable();
+  });
+  document.getElementById('bulk-apply-fv').addEventListener('click', () => {
+    const fv = document.getElementById('bulk-fv-select').value;
+    SELECTED_ROWS.forEach(id => {
+      const mov = MOV.find(m=>m.row_id===id);
+      if(mov && tipoOf(mov)==='Gasto'){ mov.fijo_variable = fv; mov._edited = true; }
+    });
+    renderHistoricoTable();
+  });
+  document.getElementById('bulk-mark-evento').addEventListener('click', async () => {
+    const nombre = await askText('Nombre del evento puntual para las entradas seleccionadas:', '', 'Marcar como evento');
+    if(!nombre) return;
+    SELECTED_ROWS.forEach(id => {
+      const mov = MOV.find(m=>m.row_id===id);
+      if(mov){ mov.es_evento_puntual = true; mov.evento_puntual = nombre; mov._edited = true; }
+    });
+    renderHistoricoTable();
+  });
+  document.getElementById('bulk-delete').addEventListener('click', async () => {
+    if(!(await askConfirm(`¿Eliminar las ${SELECTED_ROWS.size} entradas seleccionadas? No se puede deshacer.`, 'Eliminar', true))) return;
+    MOV = MOV.filter(m => !SELECTED_ROWS.has(m.row_id));
+    SELECTED_ROWS.clear();
+    renderHistoricoTable();
+  });
+}
+
+// ---------- GESTIONAR CATEGORÍAS ----------
+function toggleCatManagePanel(){
+  const panel = document.getElementById('cat-manage-panel');
+  if(panel.style.display === 'none'){
+    renderCatManagePanel();
+    panel.style.display = 'block';
+  } else {
+    panel.style.display = 'none';
+  }
+}
+
+function renderCatManagePanel(){
+  const panel = document.getElementById('cat-manage-panel');
+  panel.innerHTML = `
+    <div class="block" style="border:1px solid var(--line); background:var(--paper-raised); padding:16px 18px; margin-bottom:18px;">
+      <div class="block-head"><h3>Categorías de gasto</h3></div>
+      <p class="pagesub" style="margin-bottom:12px;">Si eliminas una categoría, las entradas que la usaban pasan a "Sin categorizar" y se resaltan en la tabla para que las revises.</p>
+      <div class="barlist" id="cat-manage-list" style="margin-bottom:14px;"></div>
+      <div class="controls">
+        <input type="text" id="cat-new-input" placeholder="Nueva categoría (ej. Mascotas)">
+        <button class="btn secondary" id="cat-new-add">Añadir categoría</button>
+      </div>
+    </div>
+  `;
+  const listEl = document.getElementById('cat-manage-list');
+  listEl.innerHTML = allCategories().map(c => `
+    <div class="barrow" style="grid-template-columns:1fr 80px;">
+      <div class="catname">${c}</div>
+      <div style="text-align:right;"><button class="btn danger cat-del-btn" data-cat="${escapeHtml(c)}" style="padding:4px 9px; font-size:11.5px;">Eliminar</button></div>
+    </div>
+  `).join('');
+  listEl.querySelectorAll('.cat-del-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const cat = btn.dataset.cat;
+      if(!(await askConfirm(`¿Eliminar la categoría "${cat}"? Las entradas que la usan pasarán a "Sin categorizar".`, 'Eliminar', true))) return;
+      CATEGORY_LIST = CATEGORY_LIST.filter(c=>c!==cat);
+      MOV.forEach(m => {
+        if(m.incluir_en_gasto && m.categoria === cat){
+          m.categoria = PENDING_CATEGORY;
+          m._edited = true;
+        }
+      });
+      refreshHistCategoriaOptions();
+      setupBulkBar();
+      renderCatManagePanel();
+      renderHistoricoTable();
+    });
+  });
+  document.getElementById('cat-new-add').addEventListener('click', () => {
+    const input = document.getElementById('cat-new-input');
+    const name = input.value.trim();
+    if(!name) return;
+    if(!CATEGORY_LIST.includes(name)) CATEGORY_LIST.push(name);
+    input.value = '';
+    refreshHistCategoriaOptions();
+    setupBulkBar();
+    renderCatManagePanel();
+  });
+}
+
+// ---------- IMPORTAR EXTRACTO NUEVO ----------
+// Lee un extracto en bruto del banco (mismo formato que los originales: cuentas con
+// columnas Fecha/Concepto/Movimiento/Importe/Observaciones, o tarjetas con
+// Fecha/Tarjeta/Concepto/Importe), aplica una categorización razonable, reconcilia
+// traspasos contra lo ya cargado, descarta duplicados exactos y añade el resto como
+// "Sin categorizar" listo para revisar en la tabla.
+const FUENTES_CONOCIDAS = ['cuenta_inigo','cuenta_comun','cuenta_ahorro','tarjeta_inigo','tarjeta_comun'];
+
+function toggleImportPanel(){
+  const panel = document.getElementById('import-extracto-panel');
+  if(panel.style.display === 'none'){
+    renderImportPanel();
+    panel.style.display = 'block';
+  } else {
+    panel.style.display = 'none';
+  }
+}
+
+function renderImportPanel(){
+  const panel = document.getElementById('import-extracto-panel');
+  panel.innerHTML = `
+    <div class="block" style="border:1px solid var(--line); background:var(--paper-raised); padding:16px 18px; margin-bottom:18px;">
+      <div class="block-head"><h3>Importar extracto nuevo</h3></div>
+      <p class="pagesub" style="margin-bottom:12px;">Sube el Excel tal cual lo exporta el banco (cuenta o tarjeta, sin tocar). Los movimientos que ya tengas cargados (misma fuente, fecha e importe) se descartan automáticamente — no se duplican. Los nuevos entran categorizados lo mejor posible; lo que no se pueda identificar queda "Sin categorizar" para que lo revises en la tabla.</p>
+      <div class="field-grid">
+        <div>
+          <label>¿De qué cuenta o tarjeta es este extracto?</label>
+          <select id="import-fuente">
+            ${FUENTES_CONOCIDAS.map(f=>`<option value="${f}">${f}</option>`).join('')}
+          </select>
+        </div>
+        <div>
+          <label>Fichero del banco (.xlsx)</label>
+          <input type="file" id="import-file-input" accept=".xlsx">
+        </div>
+      </div>
+      <div id="import-result" style="margin-top:12px;"></div>
+    </div>
+  `;
+  document.getElementById('import-file-input').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const fuente = document.getElementById('import-fuente').value;
+    importStatementFile(file, fuente);
+    e.target.value = '';
+  });
+}
+
+function importStatementFile(file, fuente){
+  const resultEl = document.getElementById('import-result');
+  resultEl.innerHTML = '<p style="font-size:13px; color:var(--ink-faint);">Leyendo…</p>';
+  if(typeof XLSX === 'undefined'){
+    resultEl.innerHTML = '<p style="color:var(--wine); font-size:13px;">No se ha podido cargar la librería de Excel. Prueba a recargar la página.</p>';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const wb = XLSX.read(reader.result, {type:'array', cellDates:true});
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const aoa = XLSX.utils.sheet_to_json(sheet, {header:1, defval:null, raw:true});
+      const isCard = FUENTES_CONOCIDAS.indexOf(fuente) >= 3;
+      const requiredCols = isCard ? ['Fecha','Tarjeta','Concepto','Importe'] : ['Fecha','Concepto','Movimiento','Importe'];
+      let headerIdx = -1;
+      for(let i=0;i<Math.min(aoa.length,15);i++){
+        const row = (aoa[i]||[]).map(c=>String(c==null?'':c).trim());
+        if(requiredCols.every(rc => row.includes(rc))){ headerIdx = i; break; }
+      }
+      if(headerIdx === -1){
+        resultEl.innerHTML = `<p style="color:var(--wine); font-size:13px;">No reconozco el formato de este fichero (esperaba columnas ${requiredCols.join(', ')}). ¿Es un extracto ${isCard?'de tarjeta':'de cuenta'} tal cual lo exporta el banco?</p>`;
+        return;
+      }
+      const headers = aoa[headerIdx].map(c=>String(c==null?'':c).trim());
+      const dataRows = aoa.slice(headerIdx+1).filter(r => r && r.some(c=>c!=null && c!==''));
+      const rawRows = dataRows.map(r => {
+        const obj = {};
+        headers.forEach((h,i) => { if(h) obj[h] = r[i]; });
+        return obj;
+      }).filter(r => r['Fecha'] != null);
+
+      const {added, duplicates, pending} = processImportedRows(rawRows, fuente, isCard);
+
+      resultEl.innerHTML = `
+        <div class="callout" style="border-color:${added>0?'var(--accent-fixed)':'var(--line)'};">
+          <b>${added}</b> movimientos nuevos añadidos · <b>${duplicates}</b> duplicados descartados (ya estaban cargados) · <b>${pending}</b> quedaron "Sin categorizar"${pending>0 ? ' — <a href="#" id="import-ver-pendientes" style="color:var(--wine); text-decoration:underline;">verlas ahora</a>' : ''}.
+        </div>
+      `;
+      if(added > 0){
+        renderHistoricoTable();
+      }
+      const verPendientes = document.getElementById('import-ver-pendientes');
+      if(verPendientes){
+        verPendientes.addEventListener('click', (e) => {
+          e.preventDefault();
+          document.getElementById('hf-tipo').value = '';
+          HIST_CAT_FILTER = new Set([PENDING_CATEGORY]);
+          refreshHistCategoriaOptions();
+          renderHistoricoTable();
+          document.getElementById('hist-table-wrap').scrollIntoView({behavior:'smooth', block:'start'});
+        });
+      }
+    }catch(err){
+      resultEl.innerHTML = `<p style="color:var(--wine); font-size:13px;">Error al leer el fichero: ${escapeHtml(err.message)}</p>`;
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ---------- Categorización simplificada para extractos importados ----------
+function normImp(s){ return stripAccents(String(s||'')).toLowerCase().trim(); }
+
+const IMPORT_CARD_RULES = [
+  [/autoserv\.?bbva/, 'EXCLUIR_CAJERO_TARJETA'],
+  [/recibo mes anterior/, 'EXCLUIR_RECIBO'],
+  [/ingreso desde cuenta/, 'EXCLUIR_INGRESO'],
+  [/mercadona|carrefour|alcampo|lidl|supercor|super euro|primaprix|carniceria|fruteria|panaderia|alimentacion|freshis/, 'Supermercado/Alimentación'],
+  [/farmacia|paranat|promofarma|naturitas/, 'Farmacia'],
+  [/clinica|centro medico|dental|optica|fisio|quiron|salud/, 'Salud'],
+  [/repsol|cepsa|shell|galp|estacion de servicio/, 'Gasolina'],
+  [/emt|metro de madrid|motosharing|parking|autopista|renfe|cabify|uber|taxi|seitt/, 'Transporte urbano'],
+  [/volotea|iryo|ryanair|iberia|vueling|booking|airbnb|hotel/, 'Viajes/Hoteles'],
+  [/decathlon|club de campo|centro deportivo|golf|gimnasio|padel/, 'Deporte'],
+  [/amazon|amzn/, 'Amazon'],
+  [/zara|mango|oysho|bershka|pull&bear|stradivarius|primark|h&m|tendam/, 'Ropa/Moda'],
+  [/paypal/, 'PayPal'],
+  [/restaurante|cafe|coffee|cafeteria|heladeria|taberna/, 'Restaurantes/Cafeterías'],
+  [/netflix|spotify|hbo|disney|icloud|google play|google one/, 'Suscripciones digitales'],
+  [/peluquer|barber/, 'Peluquería/Estética'],
+  [/dgt|sancion|multa/, 'Multas/DGT'],
+  [/leroy merlin|ikea|zara home|zarahome/, 'Hogar/Compras online'],
+];
+const IMPORT_ACCOUNT_MAP = {
+  'traspaso a tarjeta':'EXCLUIR_PAGO_TARJETA', 'adeudo mensual de tarjeta':'EXCLUIR_PAGO_TARJETA',
+  'adeudo paypal europe s.a.r.l. et cie s.c.a':'PayPal', 'adeudo paypal (europe) s.a r.l. et cie, s.c.a.':'PayPal',
+  'ret. efectivo  a debito con tarj. en cajero. aut.':'Cajero/Efectivo', 'disposicion de efectivo en cajero servired':'Cajero/Efectivo',
+  'cargo por amortizacion de prestamo/credito':'Préstamos/Crédito',
+  'transferencia recibida':'INGRESO', 'abono por transferencia a su favor recibida en euros':'INGRESO',
+  'abono de nomina':'INGRESO', 'pension':'INGRESO',
+  'adeudo colegio santa maria del pilar':'Colegio/Extraescolares', 'adeudo nemomarlin franchise s.l.':'Colegio/Extraescolares',
+  'adeudo de endesa':'Luz', 'adeudo gc re octopus energy':'Luz', 'adeudo de iberdrola':'Luz',
+  'adeudo comunidad de propietarios':'Comunidad/Vivienda',
+  'adeudo de bbva seguros':'Seguros', 'bbva plan estarseguro':'Seguros', 'adeudo de mutua madrilena automovil':'Seguros',
+  'adeudo de vodafone':'Telefonía/Internet',
+  'adeudo de cuota de la seguridad social':'Seguridad Social',
+  'adeudo centro deportivo smp':'Deporte', 'adeudo club de campo villa de madrid':'Deporte',
+  'pago de impuestos':'Impuestos',
+};
+
+function processImportedRows(rawRows, fuente, isCard){
+  const isCardSrc = isCard;
+  const parsed = rawRows.map((r, idx) => {
+    let fecha = r['Fecha'];
+    let fechaStr, fechaIso, dateObj;
+    if(fecha instanceof Date){
+      dateObj = fecha;
+      fechaStr = String(fecha.getDate()).padStart(2,'0')+'/'+String(fecha.getMonth()+1).padStart(2,'0')+'/'+fecha.getFullYear();
+      fechaIso = fecha.getFullYear()+'-'+String(fecha.getMonth()+1).padStart(2,'0')+'-'+String(fecha.getDate()).padStart(2,'0');
+    } else {
+      fechaStr = String(fecha||'').trim();
+      const parts = fechaStr.split('/');
+      if(parts.length===3){
+        dateObj = new Date(parseInt(parts[2]), parseInt(parts[1])-1, parseInt(parts[0]));
+        fechaIso = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+      }
+    }
+    const importeRaw = r['Importe'];
+    const importe = typeof importeRaw === 'number' ? importeRaw : parseFloat(String(importeRaw).replace(/\./g,'').replace(',', '.'));
+    const concepto = isCardSrc ? r['Concepto'] : r['Concepto'];
+    const movimiento = isCardSrc ? r['Tarjeta'] : r['Movimiento'];
+    const observaciones = isCardSrc ? null : r['Observaciones'];
+    return {
+      fecha: fechaStr, fecha_iso: fechaIso, _date: dateObj, _month: dateObj?monthKey(dateObj):null, _year: dateObj?dateObj.getFullYear():null,
+      fuente, tipo: isCardSrc?'tarjeta':'cuenta', concepto, movimiento, observaciones,
+      importe: isNaN(importe)?0:importe
+    };
+  }).filter(r => r.fecha_iso && !isNaN(r.importe));
+
+  // Deduplicar contra lo ya cargado: misma fuente, misma fecha, mismo importe (redondeado a céntimos)
+  const existingKeys = new Set(MOV.filter(m=>m.fuente===fuente).map(m => `${m.fecha_iso}|${Math.round(m.importe*100)}`));
+  let duplicates = 0, added = 0, pending = 0;
+  const newlyAddedKeys = new Set();
+  const toAdd = [];
+
+  parsed.forEach(r => {
+    const key = `${r.fecha_iso}|${Math.round(r.importe*100)}`;
+    if(existingKeys.has(key) || newlyAddedKeys.has(key)){ duplicates++; return; }
+    newlyAddedKeys.add(key);
+
+    let categoria, incluir_en_gasto = true, categoria_ingreso;
+    const c = normImp(r.concepto);
+
+    if(isCardSrc){
+      let matched = null;
+      for(const [re, cat] of IMPORT_CARD_RULES){ if(re.test(c)){ matched = cat; break; } }
+      if(matched && matched.startsWith('EXCLUIR')){ categoria = matched; incluir_en_gasto = false; }
+      else if(matched){ categoria = matched; }
+      else { categoria = PENDING_CATEGORY; pending++; }
+    } else {
+      if(c === 'bizum'){
+        if(r.importe > 0){ categoria = 'INGRESO'; categoria_ingreso = autoIngresoCategoria(r); }
+        else { categoria = 'Otros'; }
+      } else if(c === 'adeudo de endesa' && Math.abs(r.importe) > 5000){
+        categoria = 'EXCLUIR_ANOMALIA_NO_GASTO'; incluir_en_gasto = false;
+      } else if(IMPORT_ACCOUNT_MAP[c]){
+        categoria = IMPORT_ACCOUNT_MAP[c];
+      } else if(c === 'traspaso desde cuenta' || c === 'traspaso a cuenta'){
+        // Reconciliar contra todo lo cargado + lo que se está importando ahora mismo (±5 días, importe opuesto exacto)
+        const amt = r.importe;
+        const found = MOV.concat(toAdd).some(m => m.fuente !== fuente &&
+          Math.abs(m.importe + amt) < 0.01 &&
+          Math.abs((new Date(m.fecha_iso)) - (new Date(r.fecha_iso))) <= 5*24*3600*1000);
+        if(found){ categoria = 'EXCLUIR_TRASPASO_INTERNO'; incluir_en_gasto = false; }
+        else if(amt > 0){ categoria = 'INGRESO'; categoria_ingreso = autoIngresoCategoria(r); }
+        else { categoria = PENDING_CATEGORY; pending++; }
+      } else {
+        categoria = PENDING_CATEGORY; pending++;
+      }
+    }
+
+    if(categoria && categoria.startsWith && categoria.startsWith('EXCLUIR')) incluir_en_gasto = false;
+    if(categoria === 'INGRESO') incluir_en_gasto = false;
+
+    const mov = {
+      row_id: 'IMP-' + Date.now() + '-' + Math.random().toString(36).slice(2,6),
+      fecha: r.fecha, fecha_iso: r.fecha_iso, _date: r._date, _month: r._month, _year: r._year,
+      fuente: r.fuente, tipo: r.tipo, concepto: r.concepto, importe: r.importe,
+      categoria, categoria_ingreso,
+      fijo_variable: FIJOS_DISPLAY.has(categoria) ? 'Fijo' : 'Variable',
+      es_evento_puntual: false, evento_puntual: null,
+      incluir_en_gasto, es_estimado: false, es_importado: true,
+      observaciones: r.observaciones
+    };
+    toAdd.push(mov);
+    added++;
+  });
+
+  MOV = MOV.concat(toAdd);
+  MOV.sort((a,b) => a._date - b._date);
+  return {added, duplicates, pending};
+}
+
+
+function exportCorrectedJSON(){
+  const movimientos = MOV.map(m => {
+    const out = {};
+    ['row_id','fecha','fecha_iso','fuente','tipo','concepto','importe','categoria','categoria_ingreso','fijo_variable',
+     'es_evento_puntual','evento_puntual','incluir_en_gasto','es_estimado','es_importado','observaciones']
+      .forEach(k => { if(m.hasOwnProperty(k)) out[k] = m[k]; });
+    if(m._edited) out.categoria_editada_manualmente = true;
+    return out;
+  });
+  const metadata = Object.assign({}, DATA.metadata, {
+    exportado: new Date().toISOString().slice(0,10),
+    nota_export: 'Fichero re-exportado desde la app Finanzas Casa con correcciones manuales (categoría, categoría de ingreso, fijo/variable, eventos, entradas eliminadas).'
+  });
+  const blob = new Blob([JSON.stringify({metadata, movimientos}, null, 1)], {type:'application/json'});
+  saveFileAnywhere(blob, dateStampedFilename('consolidado_finanzas_casa_corregido', 'json'));
+}
+
+function exportCorrectedXLSX(){
+  if(typeof XLSX === 'undefined'){
+    alert('No se ha podido cargar la librería de Excel. Prueba a recargar la página.');
+    return;
+  }
+  const rows = MOV.map(m => ({
+    'ID': m.row_id,
+    'Fecha': m.fecha,
+    'Fuente': m.fuente,
+    'Tipo': m.tipo,
+    'Concepto': m.concepto,
+    'Importe': m.importe,
+    'Categoría': m.categoria,
+    'Categoría ingreso': m.categoria_ingreso || '',
+    'Fijo/Variable': m.fijo_variable,
+    'Incluir en gasto': m.incluir_en_gasto,
+    'Evento puntual': m.es_evento_puntual,
+    'Descripción evento': m.evento_puntual,
+    'Estimado': !!m.es_estimado,
+    'Categoría editada a mano': !!m._edited,
+    'Importado': !!m.es_importado,
+    'Observaciones': m.observaciones
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{wch:10},{wch:12},{wch:14},{wch:9},{wch:32},{wch:12},{wch:26},{wch:16},{wch:13},{wch:15},{wch:13},{wch:26},{wch:10},{wch:20},{wch:10},{wch:40}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Movimientos');
+  const out = XLSX.write(wb, {bookType:'xlsx', type:'array'});
+  saveFileAnywhere(new Blob([out], {type: MIME_BY_EXT.xlsx}), dateStampedFilename('consolidado_finanzas_casa_corregido', 'xlsx'));
+}
+
+// Añade la fecha de hoy al nombre del fichero exportado, y un numeral si ya se ha
+// exportado ese mismo tipo de fichero antes hoy (para no confundir versiones).
+function dateStamp(){
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function dateStampedFilename(baseName, ext){
+  const stamp = dateStamp();
+  let count = 1;
+  try{
+    const key = 'finanzas_casa_export_count_' + baseName + '_' + ext + '_' + stamp;
+    count = parseInt(localStorage.getItem(key) || '0', 10) + 1;
+    localStorage.setItem(key, String(count));
+  }catch(e){ /* si no se puede contar, se exporta sin numeral */ }
+  const suffix = count > 1 ? `_(${count})` : '';
+  return `${baseName}_${stamp}${suffix}.${ext}`;
+}
+
+function downloadBlob(blob, filename){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+}
+
+function escapeHtml(s){
+  const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
+}
+
+// ---------- CATEGORIAS ----------
+let selectedCat = null;
+function renderCategorias(){
+  const selAnio = document.getElementById('p-cat-anio');
+  if(!selAnio.dataset.init){
+    initPeriodSelectors('cat', renderCategorias);
+    selAnio.dataset.init = '1';
+    document.getElementById('chk-excl-eventos-cat').addEventListener('change', renderCategorias);
+  }
+  const exclEventos = document.getElementById('chk-excl-eventos-cat').checked;
+  const {anio, mes, months: scopeMonths} = getPeriodScope('cat');
+  const rows = gastoRows({exclEventos, mesesIn: scopeMonths});
+
+  // Ingresos, mostrados primero
+  const ingresos = ingresoRows({mesesIn: scopeMonths});
+  const totalIngresos = sum(ingresos);
+  document.getElementById('cat-ingresos-total').textContent = fmtEUR(totalIngresos);
+  const byFuenteIngreso = {};
+  ingresos.forEach(r => {
+    byFuenteIngreso[r.categoria_ingreso] = (byFuenteIngreso[r.categoria_ingreso]||0) + Math.abs(r.importe);
+  });
+  const ingSorted = INGRESO_CATEGORIES.map(c=>[c, byFuenteIngreso[c]||0]).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
+  const ingMax = ingSorted.length ? ingSorted[0][1] : 1;
+  document.getElementById('cat-ingresos-list').innerHTML = ingSorted.map(([f,val]) => `
+    <div class="barrow">
+      <div class="catname" title="${f}">${f}</div>
+      <div class="bartrack"><div class="barfill" style="width:${(val/ingMax*100).toFixed(1)}%; background:#3D6B5F"></div></div>
+      <div class="val">${fmtEUR(val)}</div>
+    </div>`).join('') || '<div class="empty">Sin ingresos en este periodo</div>';
+
+  const byCat = {};
+  rows.forEach(r => { byCat[r.categoria] = (byCat[r.categoria]||0) + Math.abs(r.importe); });
+  const sorted = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  const maxVal = sorted.length ? sorted[0][1] : 1;
+  const total = sum(rows);
+
+  const listEl = document.getElementById('cat-full-list');
+  listEl.innerHTML = sorted.map(([cat,val]) => `
+    <div class="barrow" style="cursor:pointer;" data-cat="${escapeHtml(cat)}">
+      <div class="catname" title="${cat}">${cat}</div>
+      <div class="bartrack"><div class="barfill" style="width:${(val/maxVal*100).toFixed(1)}%; background:${catColor(cat)}"></div></div>
+      <div class="val">${fmtEUR(val)} <span style="color:var(--ink-faint);">(${total?Math.round(val/total*100):0}%)</span></div>
+    </div>`).join('') || '<div class="empty">Sin datos</div>';
+
+  listEl.querySelectorAll('.barrow').forEach(el => {
+    el.addEventListener('click', () => { selectedCat = el.dataset.cat; renderCatDetail(exclEventos, scopeMonths); });
+  });
+
+  if(!selectedCat && sorted.length) selectedCat = sorted[0][0];
+  renderCatDetail(exclEventos, scopeMonths);
+}
+
+function renderCatDetail(exclEventos, scopeMonths){
+  document.getElementById('cat-detail-title').textContent = selectedCat ? selectedCat : 'Selecciona una categoría';
+  if(!selectedCat) return;
+  if(scopeMonths.length === 1){
+    const {labels, data} = groupByDay(gastoRows({exclEventos, categoria: selectedCat}), scopeMonths[0]);
+    drawLineChart('chart-cat-detail', labels, [{label: selectedCat, data, color: catColor(selectedCat)}]);
+  } else {
+    const monthly = {};
+    gastoRows({exclEventos, categoria: selectedCat}).forEach(r => { monthly[r._month] = (monthly[r._month]||0) + Math.abs(r.importe); });
+    drawLineChart('chart-cat-detail', scopeMonths.map(monthLabel), [
+      {label: selectedCat, data: scopeMonths.map(m=>monthly[m]||0), color: catColor(selectedCat)}
+    ]);
+  }
+}
+
+// ---------- EVENTOS ----------
+function renderEventos(){
+  const rows = MOV.filter(m => m.incluir_en_gasto && m.es_evento_puntual);
+  const byEvento = {};
+  rows.forEach(r => {
+    const key = r.evento_puntual || 'Sin nombre';
+    if(!byEvento[key]) byEvento[key] = {total:0, rows:[]};
+    byEvento[key].total += Math.abs(r.importe);
+    byEvento[key].rows.push(r);
+  });
+  const wrap = document.getElementById('eventos-list');
+  const entries = Object.entries(byEvento).sort((a,b)=>b[1].total-a[1].total);
+  if(!entries.length){ wrap.innerHTML = '<div class="empty">No hay eventos puntuales marcados en los datos. Márcalos desde Histórico seleccionando entradas y usando "Marcar como evento".</div>'; return; }
+
+  wrap.innerHTML = entries.map(([name, info]) => `
+    <div class="block" data-evento="${escapeHtml(name)}">
+      <div class="block-head">
+        <input type="text" class="evt-rename" value="${escapeHtml(name)}" style="font-family:var(--serif); font-size:16px; font-weight:600; background:none; border:none; border-bottom:1px dashed var(--line); padding:2px 0; color:var(--ink);">
+        <span class="note">${fmtEUR(info.total)} · ${info.rows.length} movimientos</span>
+      </div>
+      <div class="table-scroll"><table class="data cards evt">
+        <thead><tr><th>Fecha</th><th>Fuente</th><th>Concepto</th><th style="text-align:right;">Importe</th><th></th></tr></thead>
+        <tbody>
+          ${info.rows.sort((a,b)=>a._date-b._date).map(r => `
+            <tr data-rowid="${r.row_id}">
+              <td class="mono">${r.fecha}</td><td>${r.fuente}</td><td>${escapeHtml(r.concepto||'')}</td>
+              <td class="amt neg">${fmtEURDec(r.importe)}</td>
+              <td><button class="btn danger evt-remove" style="padding:4px 8px; font-size:11px;">Quitar del evento</button></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table></div>
+    </div>
+  `).join('');
+
+  wrap.querySelectorAll('.evt-rename').forEach(input => {
+    const originalName = input.closest('[data-evento]').dataset.evento;
+    input.addEventListener('change', (e) => {
+      const newName = e.target.value.trim();
+      if(!newName || newName === originalName) return;
+      MOV.forEach(m => { if(m.evento_puntual === originalName) { m.evento_puntual = newName; m._edited = true; } });
+      renderEventos();
+    });
+  });
+  wrap.querySelectorAll('.evt-remove').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const rowId = e.target.closest('tr').dataset.rowid;
+      const mov = MOV.find(m=>m.row_id===rowId);
+      if(mov){ mov.es_evento_puntual = false; mov.evento_puntual = null; mov._edited = true; }
+      renderEventos();
+    });
+  });
+}
+
+// ---------- PROYECCIONES ----------
+let INGRESO_BASE_OVERRIDE = null; // null = usar la media calculada
+let MONTHLY_GASTO_OVERRIDES = {}; // {mes: importe}
+let MONTHLY_INGRESO_OVERRIDES = {}; // {mes: importe}
+let FOCUSED_MONTH = null; // mes (YYYY-MM) seleccionado para ver su detalle aparte
+let LAST_PROJ_ROWS = [];
+let LAST_CAT_AVERAGES = null;
+let LAST_ALL_MONTHS = null;
+let LAST_AVG_INCOME = 0;
+
+function renderProyecciones(){
+  const slider = document.getElementById('horizonte-slider');
+  const val = document.getElementById('horizonte-val');
+  const baseSel = document.getElementById('sel-base-meses');
+  const ingresoInput = document.getElementById('ingreso-base-input');
+  const chartHorizSel = document.getElementById('sel-chart-horizonte');
+  if(!slider.dataset.init){
+    slider.addEventListener('input', () => { val.textContent = slider.value; renderProjectionCalc(); });
+    baseSel.addEventListener('change', renderProjectionOutput);
+    chartHorizSel.addEventListener('change', renderProjectionCalc);
+    ingresoInput.addEventListener('input', (e) => {
+      const v = parseFloat(e.target.value);
+      INGRESO_BASE_OVERRIDE = isNaN(v) ? null : v;
+      renderProjectionCalc();
+    });
+    document.getElementById('btn-add-evento').addEventListener('click', () => addEventoFuturoRow());
+    document.getElementById('btn-reset-cat-base').addEventListener('click', () => {
+      CAT_BASE_OVERRIDES = {};
+      renderProjectionOutput();
+    });
+    document.getElementById('btn-guardar-escenario').addEventListener('click', guardarEscenario);
+    document.getElementById('cargar-escenario-input').addEventListener('change', cargarEscenario);
+    document.getElementById('btn-export-proyeccion-csv').addEventListener('click', exportProyeccionCSV);
+    document.getElementById('btn-cerrar-mes-focus').addEventListener('click', () => {
+      FOCUSED_MONTH = null;
+      document.getElementById('proy-mes-focus-block').style.display = 'none';
+    });
+    slider.dataset.init = '1';
+  }
+  val.textContent = slider.value;
+  renderEventosFuturosList();
+  renderProjectionOutput();
+  wireEscenarios();
+  renderEscenariosBar();
+}
+
+const FRECUENCIA_MESES = {mensual:1, bimensual:2, trimestral:3, semestral:6, anual:12};
+
+function addEventoFuturoRow(nombre, mes, importe, categoria){
+  EVENTOS_FUTUROS.push({
+    id: 'ef' + Date.now() + Math.random().toString(36).slice(2,6),
+    nombre: nombre || '',
+    mes: mes || nextMonthKey(),
+    importe: importe !== undefined ? importe : 0,
+    categoria: categoria || 'Otros',
+    movimiento: 'gasto',   // 'gasto' | 'ingreso'
+    tipo: 'puntual',       // 'puntual' | 'recurrente'
+    frecuencia: 'mensual', // solo aplica si tipo === 'recurrente'
+    mesFin: null           // null = sin fin (hasta el final del horizonte)
+  });
+  renderEventosFuturosList();
+  renderProjectionCalc();
+}
+
+function nextMonthKey(){
+  const d = new Date(); d.setMonth(d.getMonth()+1);
+  return monthKey(d);
+}
+
+// Devuelve, de entre los meses futuros del horizonte, en cuáles se aplica este evento.
+function eventoAppliesMonths(ev, futureMonths){
+  if(!ev.mes) return [];
+  if(ev.tipo !== 'recurrente'){
+    return futureMonths.includes(ev.mes) ? [ev.mes] : [];
+  }
+  const step = FRECUENCIA_MESES[ev.frecuencia] || 1;
+  const [sy, sm] = ev.mes.split('-').map(Number);
+  const startIdx = sy*12 + (sm-1);
+  let endIdx = Infinity;
+  if(ev.mesFin){
+    const [ey, em] = ev.mesFin.split('-').map(Number);
+    endIdx = ey*12 + (em-1);
+  }
+  return futureMonths.filter(mk => {
+    const [y,m] = mk.split('-').map(Number);
+    const idx = y*12 + (m-1);
+    if(idx < startIdx || idx > endIdx) return false;
+    return (idx - startIdx) % step === 0;
+  });
+}
+
+function renderEventosFuturosList(){
+  const wrap = document.getElementById('eventos-futuros-list');
+  if(!EVENTOS_FUTUROS.length){
+    wrap.innerHTML = '<div class="empty">No has añadido eventos futuros todavía.</div>';
+    return;
+  }
+  const inputStyle = 'font-family:inherit; background:var(--paper-raised); border:1px solid var(--line); padding:5px 7px;';
+  wrap.innerHTML = `
+    <div class="table-scroll"><table class="data cards ef">
+      <thead><tr>
+        <th style="min-width:110px;">Nombre</th><th>Movimiento</th><th>Tipo</th><th>Desde</th><th>Frecuencia</th><th>Hasta (opc.)</th>
+        <th>Categoría</th><th style="text-align:right;">Importe (€)</th><th></th>
+      </tr></thead>
+      <tbody>
+        ${EVENTOS_FUTUROS.map(ev => {
+          const recurrente = ev.tipo === 'recurrente';
+          const esIngreso = ev.movimiento === 'ingreso';
+          const cats = esIngreso ? ingresoCategoriesSorted() : allCategories();
+          return `
+          <tr data-id="${ev.id}">
+            <td data-label="Nombre"><input type="text" class="ef-nombre" value="${escapeHtml(ev.nombre)}" placeholder="ej. Bonus, paga extra" style="width:92px; ${inputStyle}"></td>
+            <td data-label="Movimiento">
+              <select class="ef-movimiento" style="width:85px; ${inputStyle}">
+                <option value="gasto" ${!esIngreso?'selected':''}>Gasto</option>
+                <option value="ingreso" ${esIngreso?'selected':''}>Ingreso</option>
+              </select>
+            </td>
+            <td data-label="Tipo">
+              <select class="ef-tipo" style="width:82px; ${inputStyle}">
+                <option value="puntual" ${!recurrente?'selected':''}>Puntual</option>
+                <option value="recurrente" ${recurrente?'selected':''}>Recurrente</option>
+              </select>
+            </td>
+            <td data-label="Desde"><input type="month" class="ef-mes" value="${ev.mes}" style="width:106px; ${inputStyle}"></td>
+            <td data-label="Frecuencia">
+              <select class="ef-frecuencia" ${recurrente?'':'disabled'} style="width:80px; ${inputStyle} ${recurrente?'':'opacity:.4;'}">
+                <option value="mensual" ${ev.frecuencia==='mensual'?'selected':''}>Mensual</option>
+                <option value="bimensual" ${ev.frecuencia==='bimensual'?'selected':''}>Bimensual</option>
+                <option value="trimestral" ${ev.frecuencia==='trimestral'?'selected':''}>Trimestral</option>
+                <option value="semestral" ${ev.frecuencia==='semestral'?'selected':''}>Semestral</option>
+                <option value="anual" ${ev.frecuencia==='anual'?'selected':''}>Anual</option>
+              </select>
+            </td>
+            <td data-label="Hasta (opcional)"><input type="month" class="ef-mesfin" value="${ev.mesFin||''}" ${recurrente?'':'disabled'} style="width:106px; ${inputStyle} ${recurrente?'':'opacity:.4;'}" title="Déjalo vacío para que dure hasta el final del horizonte"></td>
+            <td data-label="Categoría">
+              <select class="ef-cat" style="width:112px; ${inputStyle}">
+                ${cats.map(c=>`<option value="${c}" ${c===ev.categoria?'selected':''}>${c}</option>`).join('')}
+              </select>
+            </td>
+            <td class="amt" data-label="Importe (€)"><input type="number" inputmode="decimal" class="ef-importe num" value="${ev.importe}" style="width:65px; text-align:right; font-family:var(--mono); background:var(--paper-raised); border:1px solid var(--line); padding:5px 6px;"></td>
+            <td><button class="btn danger ef-del" style="padding:5px 8px; font-size:11.5px;">Quitar</button></td>
+          </tr>
+        `;}).join('')}
+      </tbody>
+    </table></div>
+    <p style="color:var(--ink-faint); font-size:12.5px; margin-top:10px;">"Gasto" resta del balance y "Ingreso" suma — así puedes añadir tanto un gasto nuevo (empleada de hogar) como un ingreso nuevo (un bonus, una paga extra). "Puntual" se aplica solo al mes indicado. "Recurrente" se repite desde ese mes según la frecuencia elegida, y sigue hasta el final del horizonte salvo que pongas un mes de fin.</p>
+  `;
+  wrap.querySelectorAll('tr[data-id]').forEach(tr => {
+    const id = tr.dataset.id;
+    const ev = EVENTOS_FUTUROS.find(e=>e.id===id);
+    tr.querySelector('.ef-nombre').addEventListener('input', e => { ev.nombre = e.target.value; renderProjectionCalc(); });
+    tr.querySelector('.ef-mes').addEventListener('input', e => { ev.mes = e.target.value; renderProjectionCalc(); });
+    tr.querySelector('.ef-cat').addEventListener('change', e => { ev.categoria = e.target.value; renderProjectionCalc(); });
+    tr.querySelector('.ef-importe').addEventListener('input', e => { ev.importe = parseFloat(e.target.value)||0; renderProjectionCalc(); });
+    tr.querySelector('.ef-movimiento').addEventListener('change', e => {
+      ev.movimiento = e.target.value;
+      ev.categoria = e.target.value === 'ingreso' ? ingresoCategoriesSorted()[0] : 'Otros';
+      renderEventosFuturosList(); renderProjectionCalc();
+    });
+    tr.querySelector('.ef-tipo').addEventListener('change', e => { ev.tipo = e.target.value; renderEventosFuturosList(); renderProjectionCalc(); });
+    tr.querySelector('.ef-frecuencia').addEventListener('change', e => { ev.frecuencia = e.target.value; renderProjectionCalc(); });
+    tr.querySelector('.ef-mesfin').addEventListener('input', e => { ev.mesFin = e.target.value || null; renderProjectionCalc(); });
+    tr.querySelector('.ef-del').addEventListener('click', () => {
+      EVENTOS_FUTUROS = EVENTOS_FUTUROS.filter(e=>e.id!==id);
+      renderEventosFuturosList(); renderProjectionCalc();
+    });
+  });
+}
+
+function renderCatBaseList(catAverages){
+  const wrap = document.getElementById('cat-base-list');
+  // Además de las categorías con historial real, incluye cualquiera que ya tengas
+  // forzada a mano (CAT_BASE_OVERRIDES) aunque todavía no tenga ningún movimiento —
+  // así puedes anticipar un gasto nuevo (p.ej. "Empleada del hogar") sin esperar a que
+  // aparezca solo tras el primer movimiento real.
+  const allCats = Array.from(new Set([...Object.keys(catAverages), ...Object.keys(CAT_BASE_OVERRIDES)]));
+  const cats = allCats.sort((a,b)=>(CAT_BASE_OVERRIDES[b] ?? catAverages[b] ?? 0)-(CAT_BASE_OVERRIDES[a] ?? catAverages[a] ?? 0));
+
+  const addableCats = allCategories().filter(c => !cats.includes(c));
+  const addRow = `
+    <div class="controls" style="margin-top:14px;">
+      <select id="cb-add-select">${addableCats.map(c=>`<option value="${c}">${c}</option>`).join('')}</select>
+      <button class="btn secondary" id="cb-add-btn">Añadir categoría a la base</button>
+    </div>
+  `;
+
+  if(!cats.length){
+    wrap.innerHTML = '<div class="empty">No hay suficiente histórico para calcular una media todavía.</div>' + (addableCats.length ? addRow : '');
+    wireAddCatBase();
+    return;
+  }
+
+  wrap.innerHTML = `
+    <div class="table-scroll"><table class="data cb">
+      <thead><tr><th>Categoría</th><th style="text-align:right;">Media calculada</th><th style="text-align:right;">Base a usar (€/mes)</th><th></th></tr></thead>
+      <tbody>
+        ${cats.map(c => {
+          const avg = catAverages.hasOwnProperty(c) ? catAverages[c] : null;
+          const overridden = CAT_BASE_OVERRIDES.hasOwnProperty(c);
+          const val = overridden ? CAT_BASE_OVERRIDES[c] : (avg || 0);
+          return `
+          <tr data-cat="${escapeHtml(c)}">
+            <td>${escapeHtml(c)}</td>
+            <td class="amt">${avg===null ? '<span style="color:var(--ink-faint);">sin historial</span>' : fmtEUR(avg)}</td>
+            <td class="amt"><input type="number" inputmode="decimal" class="cb-input num" step="1" value="${val.toFixed(0)}" style="width:110px; text-align:right; font-family:var(--mono); background:${overridden?'var(--paper)':'var(--paper-raised)'}; border:1px solid ${overridden?'var(--gold)':'var(--line)'}; padding:5px 7px;"></td>
+            <td>${overridden ? '<button class="btn danger cb-reset" style="padding:4px 9px; font-size:11.5px;">'+(avg===null?'Quitar':'Media')+'</button>' : ''}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table></div>
+    ${addableCats.length ? addRow : ''}
+  `;
+  wrap.querySelectorAll('tr[data-cat]').forEach(tr => {
+    const cat = tr.dataset.cat;
+    tr.querySelector('.cb-input').addEventListener('input', e => {
+      const v = parseFloat(e.target.value);
+      CAT_BASE_OVERRIDES[cat] = isNaN(v) ? 0 : v;
+      renderProjectionCalc();
+    });
+    const resetBtn = tr.querySelector('.cb-reset');
+    if(resetBtn){
+      resetBtn.addEventListener('click', () => {
+        delete CAT_BASE_OVERRIDES[cat];
+        renderProjectionOutput(); // rebuild table so the "Media"/"Quitar" button/border disappears
+      });
+    }
+  });
+  wireAddCatBase();
+}
+
+function wireAddCatBase(){
+  const btn = document.getElementById('cb-add-btn');
+  if(!btn) return;
+  btn.addEventListener('click', () => {
+    const sel = document.getElementById('cb-add-select');
+    if(!sel || !sel.value) return;
+    CAT_BASE_OVERRIDES[sel.value] = 0;
+    renderProjectionOutput();
+  });
+}
+
+function computeCatAverages(baseMonths){
+  const allMonths = Array.from(new Set(gastoRows({exclEventos:true, paraBalance:true}).map(r=>r._month))).sort();
+  const recentMonths = allMonths.slice(-baseMonths);
+  const catAverages = {};
+  const recentRows = gastoRows({exclEventos:true, paraBalance:true}).filter(r=>recentMonths.includes(r._month));
+  recentRows.forEach(r => { catAverages[r.categoria] = (catAverages[r.categoria]||0) + Math.abs(r.importe); });
+  Object.keys(catAverages).forEach(c => catAverages[c] = catAverages[c] / (recentMonths.length||1));
+  return {catAverages, allMonths};
+}
+
+function computeIncomeAverage(baseMonths){
+  const allIncomeMonths = Array.from(new Set(ingresoRows({}).map(r=>r._month))).sort();
+  const recentMonths = allIncomeMonths.slice(-baseMonths);
+  const total = ingresoRows({}).filter(r=>recentMonths.includes(r._month)).reduce((a,r)=>a+Math.abs(r.importe),0);
+  return recentMonths.length ? total / recentMonths.length : 0;
+}
+
+// Full refresh: recomputes averages from data and rebuilds the editable category table
+// and the default income field. Call this when the view opens or when the base-months
+// selector changes — never from a keystroke, or the user would lose focus mid-edit.
+function renderProjectionOutput(){
+  const baseMonths = parseInt(document.getElementById('sel-base-meses').value, 10);
+  const {catAverages, allMonths} = computeCatAverages(baseMonths);
+  LAST_CAT_AVERAGES = catAverages;
+  LAST_ALL_MONTHS = allMonths;
+  LAST_AVG_INCOME = computeIncomeAverage(baseMonths);
+  const ingresoInput = document.getElementById('ingreso-base-input');
+  ingresoInput.value = (INGRESO_BASE_OVERRIDE !== null ? INGRESO_BASE_OVERRIDE : LAST_AVG_INCOME).toFixed(0);
+  renderCatBaseList(catAverages);
+  renderProjectionCalc();
+}
+
+// Pure computation: turns current state (overrides, eventos futuros, horizonte...) into
+// the array of projected months. No DOM writes here, so it's safe to call as often as needed.
+function computeProjectionRows(){
+  const horizon = parseInt(document.getElementById('horizonte-slider').value, 10);
+  const catAverages = LAST_CAT_AVERAGES || {};
+  const allMonths = LAST_ALL_MONTHS || [];
+  const avgIncome = INGRESO_BASE_OVERRIDE !== null ? INGRESO_BASE_OVERRIDE : LAST_AVG_INCOME;
+
+  const effectiveCat = {};
+  Array.from(new Set([...Object.keys(catAverages), ...Object.keys(CAT_BASE_OVERRIDES)])).forEach(c => {
+    effectiveCat[c] = CAT_BASE_OVERRIDES.hasOwnProperty(c) ? CAT_BASE_OVERRIDES[c] : catAverages[c];
+  });
+  const catBaseSum = Object.values(effectiveCat).reduce((a,b)=>a+b,0);
+
+  const lastMonth = allMonths.length ? allMonths[allMonths.length-1] : monthKey(new Date());
+  const [ly, lm] = lastMonth.split('-').map(Number);
+  const futureMonths = [];
+  for(let i=1;i<=horizon;i++){
+    const d = new Date(ly, lm-1+i, 1);
+    futureMonths.push(monthKey(d));
+  }
+
+  const eventosPorMes = {};
+  EVENTOS_FUTUROS.forEach(ev => {
+    eventoAppliesMonths(ev, futureMonths).forEach(mk => {
+      if(!eventosPorMes[mk]) eventosPorMes[mk] = [];
+      eventosPorMes[mk].push(ev);
+    });
+  });
+
+  let saldoAcumulado = 0;
+  const projRows = futureMonths.map(mk => {
+    const eventos = eventosPorMes[mk] || [];
+    const eventosGasto = eventos.filter(e=>e.movimiento!=='ingreso').reduce((a,e)=>a+Math.abs(parseFloat(e.importe)||0),0);
+    const eventosIngreso = eventos.filter(e=>e.movimiento==='ingreso').reduce((a,e)=>a+Math.abs(parseFloat(e.importe)||0),0);
+    const gastoBase = MONTHLY_GASTO_OVERRIDES.hasOwnProperty(mk) ? MONTHLY_GASTO_OVERRIDES[mk] : catBaseSum;
+    const gastoTotal = gastoBase + eventosGasto;
+    const ingresoBase = MONTHLY_INGRESO_OVERRIDES.hasOwnProperty(mk) ? MONTHLY_INGRESO_OVERRIDES[mk] : avgIncome;
+    const ingreso = ingresoBase + eventosIngreso;
+    const balance = ingreso - gastoTotal;
+    saldoAcumulado += balance;
+    return {mes: mk, ingreso, ingresoBase, gastoBase, eventos: eventosGasto - eventosIngreso, gastoTotal, balance, saldoAcumulado, eventosDetalle: eventos,
+             ingresoOverridden: MONTHLY_INGRESO_OVERRIDES.hasOwnProperty(mk), gastoOverridden: MONTHLY_GASTO_OVERRIDES.hasOwnProperty(mk)};
+  });
+  LAST_PROJ_ROWS = projRows;
+  return {projRows, effectiveCat, avgIncome, allMonths, horizon};
+}
+
+// Renders KPIs, the main chart and the donut — none of these are editable inputs,
+// so they can be safely rebuilt on every keystroke without losing focus anywhere.
+function renderProjectionKPIsChartDonut(calc){
+  const {projRows, effectiveCat, allMonths, horizon} = calc;
+
+  const mesesNegativos = projRows.filter(p=>p.balance<0).length;
+  const balanceMedio = projRows.length ? projRows.reduce((a,p)=>a+p.balance,0)/projRows.length : 0;
+  const saldoFinal = projRows.length ? projRows[projRows.length-1].saldoAcumulado : 0;
+  const kpiRow = document.getElementById('proy-kpi-row');
+  kpiRow.innerHTML = `
+    <div class="kpi"><div class="label">BALANCE MEDIO/MES</div><div class="value ${balanceMedio>=0?'pos':'neg'}">${balanceMedio>=0?'+':''}${fmtEUR(balanceMedio)}</div><div class="sub">próximos ${horizon} meses</div></div>
+    <div class="kpi"><div class="label">MESES EN NEGATIVO</div><div class="value ${mesesNegativos>0?'neg':'pos'}">${mesesNegativos} de ${horizon}</div><div class="sub">${mesesNegativos>0?'revisa esos meses':'todo cubierto'}</div></div>
+    <div class="kpi"><div class="label">SALDO ACUMULADO</div><div class="value ${saldoFinal>=0?'pos':'neg'}">${saldoFinal>=0?'+':''}${fmtEUR(saldoFinal)}</div><div class="sub">al final del horizonte</div></div>
+  `;
+
+  const chartWindow = parseInt(document.getElementById('sel-chart-horizonte').value, 10) || 0;
+  const futureForChart = chartWindow > 0 ? projRows.slice(0, chartWindow) : projRows;
+  const histCount = chartWindow > 0 ? Math.min(6, allMonths.length) : 12;
+  const histMonths = allMonths.slice(-histCount);
+  const histGasto = histMonths.map(mk => sum(gastoRows({exclEventos:true, paraBalance:true}).filter(r=>r._month===mk)));
+  const histIngreso = histMonths.map(mk => sum(ingresoRows({}).filter(r=>r._month===mk)));
+  const labels = histMonths.map(monthLabel).concat(futureForChart.map(p=>monthLabel(p.mes)));
+  const gastoSeries = histGasto.concat(futureForChart.map(p=>p.gastoTotal));
+  const ingresoSeries = histIngreso.concat(futureForChart.map(p=>p.ingreso));
+  const histBalance = histMonths.map((mk,i)=>histIngreso[i]-histGasto[i]);
+  const balanceSeries = histBalance.concat(futureForChart.map(p=>p.balance));
+  const acumuladoSeries = new Array(histMonths.length).fill(null).concat(futureForChart.map(p=>p.saldoAcumulado));
+
+  drawComboChart('chart-proyeccion', labels, [
+    {label:'Ingresos', data: ingresoSeries, color:'#3D6B5F', type:'bar'},
+    {label:'Gastos', data: gastoSeries, color:'#8C3B3B', type:'bar'},
+    {label:'Balance', data: balanceSeries, color:'#A9822E', type:'line', dashed:true},
+    {label:'Balance acumulado', data: acumuladoSeries, color:'#1F3B36', type:'line'}
+  ]);
+
+  const catEntries = Object.entries(effectiveCat).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
+  drawDoughnutChart('chart-proyeccion-donut', catEntries.map(e=>e[0]), catEntries.map(e=>e[1]), catEntries.map(e=>catColor(e[0])));
+
+  if(FOCUSED_MONTH){
+    const p = projRows.find(pr => pr.mes === FOCUSED_MONTH);
+    if(p) showMonthFocus(p); else { FOCUSED_MONTH = null; document.getElementById('proy-mes-focus-block').style.display = 'none'; }
+  }
+}
+
+// Full refresh: recompute + KPIs/chart/donut + rebuild the monthly table's DOM.
+// Use this for anything that changes state from OUTSIDE that table's own inputs
+// (horizon slider, base months, category overrides, eventos futuros, ingreso base, resets).
+function renderProjectionCalc(){
+  const calc = computeProjectionRows();
+  renderProjectionKPIsChartDonut(calc);
+  renderProyTable(calc.projRows, calc.avgIncome);
+}
+
+// Lightweight refresh for edits made INSIDE the monthly table's own inputs (pm-ingreso/pm-gasto):
+// recomputes and updates KPIs/chart/donut plus the read-only cells of the table in place,
+// without touching the input elements themselves — rebuilding them would steal focus after
+// every keystroke, which is why typing used to only register one digit at a time.
+function updateProjectionFromTableEdit(){
+  const calc = computeProjectionRows();
+  renderProjectionKPIsChartDonut(calc);
+  patchProyTableCells(calc.projRows);
+}
+
+function patchProyTableCells(projRows){
+  const wrap = document.getElementById('proy-table-wrap');
+  projRows.forEach(p => {
+    const tr = wrap.querySelector(`tr[data-mes="${p.mes}"]`);
+    if(!tr) return;
+    const eventosCell = tr.querySelector('.cell-eventos');
+    const balanceCell = tr.querySelector('.cell-balance');
+    const acumCell = tr.querySelector('.cell-acumulado');
+    if(eventosCell){
+      eventosCell.className = 'amt cell-eventos' + (p.eventos>0?' neg':'');
+      eventosCell.textContent = p.eventos===0 ? '—' : (p.eventos>0 ? '-'+fmtEUR(p.eventos) : '+'+fmtEUR(-p.eventos));
+    }
+    if(balanceCell){
+      balanceCell.textContent = (p.balance>=0?'+':'') + fmtEUR(p.balance);
+      balanceCell.style.color = p.balance>=0 ? 'var(--accent-fixed)' : 'var(--wine)';
+    }
+    if(acumCell){
+      acumCell.textContent = (p.saldoAcumulado>=0?'+':'') + fmtEUR(p.saldoAcumulado);
+      acumCell.style.color = p.saldoAcumulado>=0 ? 'var(--accent-fixed)' : 'var(--wine)';
+    }
+    const resetTd = tr.querySelector('.cell-reset');
+    if(resetTd){
+      const showReset = p.ingresoOverridden || p.gastoOverridden;
+      resetTd.innerHTML = showReset ? '<button class="btn danger pm-reset" style="padding:4px 8px; font-size:11px;">Media</button>' : '';
+      if(showReset) wireResetButton(resetTd.querySelector('.pm-reset'), p.mes);
+    }
+  });
+}
+
+function wireResetButton(btn, mk){
+  if(!btn) return;
+  btn.addEventListener('click', () => {
+    delete MONTHLY_INGRESO_OVERRIDES[mk];
+    delete MONTHLY_GASTO_OVERRIDES[mk];
+    renderProjectionCalc();
+  });
+}
+
+function renderProyTable(projRows, avgIncome){
+  const wrap = document.getElementById('proy-table-wrap');
+  wrap.innerHTML = `
+    <div class="table-scroll"><table class="data cards proy">
+      <thead><tr>
+        <th>Mes</th><th style="text-align:right;">Ingreso base (€)</th><th style="text-align:right;">Gasto base (€)</th>
+        <th style="text-align:right;">Eventos</th><th style="text-align:right;">Balance</th><th style="text-align:right;">Balance acumulado</th><th></th>
+      </tr></thead>
+      <tbody>
+        ${projRows.map(p => `
+          <tr data-mes="${p.mes}">
+            <td class="mono cell-mes" style="cursor:pointer; text-decoration:underline dotted;" title="Ver solo este mes">${monthLabel(p.mes)}</td>
+            <td class="amt cell-ing" data-label="Ingreso base"><input type="number" inputmode="decimal" class="pm-ingreso num" step="10" value="${p.ingresoBase.toFixed(0)}" style="width:90px; text-align:right; font-family:var(--mono); background:${p.ingresoOverridden?'var(--paper)':'var(--paper-raised)'}; border:1px solid ${p.ingresoOverridden?'var(--gold)':'var(--line)'}; padding:4px 6px;"></td>
+            <td class="amt cell-gas" data-label="Gasto"><input type="number" inputmode="decimal" class="pm-gasto num" step="10" value="${p.gastoBase.toFixed(0)}" style="width:90px; text-align:right; font-family:var(--mono); background:${p.gastoOverridden?'var(--paper)':'var(--paper-raised)'}; border:1px solid ${p.gastoOverridden?'var(--gold)':'var(--line)'}; padding:4px 6px;"></td>
+            <td class="amt cell-eventos ${p.eventos>0?'neg':''}" data-label="Eventos">${p.eventos===0 ? '—' : (p.eventos>0 ? '-'+fmtEUR(p.eventos) : '+'+fmtEUR(-p.eventos))}</td>
+            <td class="amt cell-balance" data-label="Balance" style="font-weight:600; color:${p.balance>=0?'var(--accent-fixed)':'var(--wine)'};">${p.balance>=0?'+':''}${fmtEUR(p.balance)}</td>
+            <td class="amt cell-acumulado" data-label="Acumulado" style="font-weight:600; color:${p.saldoAcumulado>=0?'var(--accent-fixed)':'var(--wine)'};">${p.saldoAcumulado>=0?'+':''}${fmtEUR(p.saldoAcumulado)}</td>
+            <td class="cell-reset">${(p.ingresoOverridden||p.gastoOverridden) ? '<button class="btn danger pm-reset" style="padding:4px 8px; font-size:11px;">Media</button>' : ''}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table></div>
+    <p style="color:var(--ink-faint); font-size:12.5px; margin-top:12px;">Gasto base = suma de categorías (arriba) salvo que edites un mes concreto aquí. Ingreso base = ${fmtEUR(avgIncome)}/mes por defecto salvo que edites un mes concreto; no incluye los eventos de ingreso (bonus, etc.), que van en "Eventos". "Eventos" muestra el efecto neto (gasto en rojo, ingreso en verde). Balance = ingreso base − gasto base − eventos. "Balance acumulado" arrastra el balance de todos los meses anteriores del horizonte. Detalle: ${projRows.flatMap(p=>p.eventosDetalle.map(e=>`${monthLabel(p.mes)}: ${escapeHtml(e.nombre||e.categoria)}`)).join(' · ') || 'ninguno'}.</p>
+  `;
+  wrap.querySelectorAll('tr[data-mes]').forEach(tr => {
+    const mk = tr.dataset.mes;
+    tr.querySelector('.pm-ingreso').addEventListener('input', e => {
+      const v = parseFloat(e.target.value);
+      MONTHLY_INGRESO_OVERRIDES[mk] = isNaN(v) ? 0 : v;
+      updateProjectionFromTableEdit();
+    });
+    tr.querySelector('.pm-gasto').addEventListener('input', e => {
+      const v = parseFloat(e.target.value);
+      MONTHLY_GASTO_OVERRIDES[mk] = isNaN(v) ? 0 : v;
+      updateProjectionFromTableEdit();
+    });
+    wireResetButton(tr.querySelector('.pm-reset'), mk);
+    tr.querySelector('td.mono').addEventListener('click', () => {
+      FOCUSED_MONTH = mk;
+      const p = LAST_PROJ_ROWS.find(pr=>pr.mes===mk);
+      if(p) showMonthFocus(p);
+    });
+  });
+}
+
+function showMonthFocus(p){
+  const block = document.getElementById('proy-mes-focus-block');
+  block.style.display = 'block';
+  document.getElementById('proy-mes-focus-title').textContent = 'Mes seleccionado: ' + monthLabel(p.mes);
+  document.getElementById('proy-mes-focus-kpi').innerHTML = `
+    <div class="kpi"><div class="label">INGRESO BASE</div><div class="value pos">${fmtEUR(p.ingresoBase)}</div></div>
+    <div class="kpi"><div class="label">GASTO BASE</div><div class="value neg">${fmtEUR(p.gastoBase)}</div></div>
+    <div class="kpi"><div class="label">EVENTOS (neto)</div><div class="value ${p.eventos>0?'neg':(p.eventos<0?'pos':'')}">${p.eventos===0?'—':(p.eventos>0?'-'+fmtEUR(p.eventos):'+'+fmtEUR(-p.eventos))}</div><div class="sub">${p.eventosDetalle.map(e=>escapeHtml(e.nombre||e.categoria)).join(', ')||''}</div></div>
+    <div class="kpi"><div class="label">BALANCE</div><div class="value ${p.balance>=0?'pos':'neg'}">${p.balance>=0?'+':''}${fmtEUR(p.balance)}</div></div>
+  `;
+  block.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+// ---------- GUARDAR / EXPORTAR ESCENARIO ----------
+function guardarEscenario(){
+  const escenario = {
+    horizonte: parseInt(document.getElementById('horizonte-slider').value, 10),
+    baseMeses: parseInt(document.getElementById('sel-base-meses').value, 10),
+    ingresoBaseOverride: INGRESO_BASE_OVERRIDE,
+    catBaseOverrides: CAT_BASE_OVERRIDES,
+    monthlyGastoOverrides: MONTHLY_GASTO_OVERRIDES,
+    monthlyIngresoOverrides: MONTHLY_INGRESO_OVERRIDES,
+    eventosFuturos: EVENTOS_FUTUROS
+  };
+  const blob = new Blob([JSON.stringify({escenario_finanzas_casa: escenario}, null, 1)], {type:'application/json'});
+  saveFileAnywhere(blob, dateStampedFilename('escenario_proyeccion_finanzas_casa', 'json'));
+}
+
+function cargarEscenario(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const parsed = JSON.parse(reader.result);
+      const r = importScenariosFromJSON(parsed, file.name);
+      renderEscenariosBar(); persistState();
+      showToast(r.applied ? 'Escenario «' + r.applied + '» importado y aplicado.'
+                          : (r.added ? `${r.added} escenario(s) importado(s) a la lista.` : 'Ese fichero no tenía escenarios nuevos.'));
+    }catch(err){ showToast('No se ha podido leer el fichero de escenario.', true); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+function exportProyeccionCSV(){
+  const header = 'Mes;Ingresos;Gasto base;Eventos;Gasto total;Balance;Saldo acumulado\n';
+  const lines = LAST_PROJ_ROWS.map(p => [
+    monthLabel(p.mes), p.ingreso.toFixed(2), p.gastoBase.toFixed(2), p.eventos.toFixed(2),
+    p.gastoTotal.toFixed(2), p.balance.toFixed(2), p.saldoAcumulado.toFixed(2)
+  ].join(';'));
+  const csv = header + lines.join('\n');
+  const blob = new Blob(['\ufeff' + csv], {type:'text/csv;charset=utf-8;'});
+  saveFileAnywhere(blob, dateStampedFilename('proyeccion_finanzas_casa', 'csv'));
+}
+
+// ---------- CHARTS ----------
+function drawLineChart(canvasId, labels, series){
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  if(CHARTS[canvasId]) CHARTS[canvasId].destroy();
+  const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches && document.documentElement.getAttribute('data-theme') !== 'light';
+  const gridColor = isDark ? '#2C3A38' : '#DDE3DF';
+  const textColor = isDark ? '#A9BDB6' : '#4B6660';
+
+  CHARTS[canvasId] = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: series.map(s => ({
+        label: s.label,
+        data: s.data,
+        borderColor: s.color,
+        backgroundColor: s.color + '22',
+        borderWidth: 2,
+        borderDash: s.dashed ? [5,4] : [],
+        fill: series.length===1,
+        tension: 0.25,
+        pointRadius: labels.length > 20 ? 0 : 3,
+        spanGaps: true,
+      }))
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {mode:'index', intersect:false},
+      plugins: {
+        legend: {display: series.length>1, labels:{color:textColor, font:{family:'JetBrains Mono', size:11}}},
+        tooltip: {
+          callbacks: {
+            label: (item) => item.dataset.label + ': ' + fmtEUR(item.parsed.y)
+          }
+        }
+      },
+      scales: {
+        x: {ticks:{color:textColor, font:{family:'JetBrains Mono', size:10}}, grid:{color:gridColor}},
+        y: {ticks:{color:textColor, font:{family:'JetBrains Mono', size:10}, callback:(v)=>fmtEUR(v)}, grid:{color:gridColor}}
+      }
+    }
+  });
+}
+
+function drawComboChart(canvasId, labels, series){
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  if(CHARTS[canvasId]) CHARTS[canvasId].destroy();
+  const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches && document.documentElement.getAttribute('data-theme') !== 'light';
+  const gridColor = isDark ? '#2C3A38' : '#DDE3DF';
+  const textColor = isDark ? '#A9BDB6' : '#4B6660';
+  CHARTS[canvasId] = new Chart(ctx, {
+    data: {
+      labels,
+      datasets: series.map(s => s.type === 'line' ? {
+        type:'line', label:s.label, data:s.data, borderColor:s.color, backgroundColor:s.color,
+        borderWidth:2, borderDash: s.dashed?[5,4]:[], tension:0.25, pointRadius: labels.length>20?0:3,
+        yAxisID:'y', order:0, spanGaps:true
+      } : {
+        type:'bar', label:s.label, data:s.data, backgroundColor:s.color+'CC', yAxisID:'y', order:1
+      })
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:'index', intersect:false},
+      plugins: {
+        legend: { position:'bottom', labels:{color:textColor, font:{family:'JetBrains Mono', size:10.5}} },
+        tooltip: { callbacks: { label:(item)=> item.dataset.label + ': ' + fmtEUR(item.parsed.y) } }
+      },
+      scales: {
+        x: {ticks:{color:textColor, font:{family:'JetBrains Mono', size:10}}, grid:{display:false}},
+        y: {ticks:{color:textColor, font:{family:'JetBrains Mono', size:10}, callback:(v)=>fmtEUR(v)}, grid:{color:gridColor}}
+      }
+    }
+  });
+}
+
+function drawDoughnutChart(canvasId, labels, values, colors){
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  if(CHARTS[canvasId]) CHARTS[canvasId].destroy();
+  const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches && document.documentElement.getAttribute('data-theme') !== 'light';
+  const textColor = isDark ? '#A9BDB6' : '#4B6660';
+  const bg = isDark ? '#12181A' : '#EDEFEC';
+  CHARTS[canvasId] = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data: values, backgroundColor: colors, borderColor: bg, borderWidth: 2 }] },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins: {
+        legend: { position:'bottom', labels:{color:textColor, font:{family:'JetBrains Mono', size:10.5}, boxWidth:11, padding:10} },
+        tooltip: { callbacks: { label:(item)=> item.label + ': ' + fmtEUR(item.parsed) + ' (' + (item.parsed/item.dataset.data.reduce((a,b)=>a+b,0)*100).toFixed(0) + '%)' } }
+      }
+    }
+  });
+}
+
+function drawBarChart(canvasId, labels, series, stacked){
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  if(CHARTS[canvasId]) CHARTS[canvasId].destroy();
+  const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches && document.documentElement.getAttribute('data-theme') !== 'light';
+  const gridColor = isDark ? '#2C3A38' : '#DDE3DF';
+  const textColor = isDark ? '#A9BDB6' : '#4B6660';
+  CHARTS[canvasId] = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: series.map(s => ({ label:s.label, data:s.data, backgroundColor:s.color })) },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins: {
+        legend: { display: series.length>1, position:'bottom', labels:{color:textColor, font:{family:'JetBrains Mono', size:10.5}} },
+        tooltip: { callbacks: { label:(item)=> item.dataset.label + ': ' + fmtEUR(item.parsed.y) } }
+      },
+      scales: {
+        x: {stacked: !!stacked, ticks:{color:textColor, font:{family:'JetBrains Mono', size:10.5}}, grid:{display:false}},
+        y: {stacked: !!stacked, ticks:{color:textColor, font:{family:'JetBrains Mono', size:10}, callback:(v)=>fmtEUR(v)}, grid:{color:gridColor}}
+      }
+    }
+  });
+}
+
+// ---------- GRAFICOS (vista tipo informe) ----------
+function renderGraficos(){
+  const selAnio = document.getElementById('p-graf-anio');
+  if(!selAnio.dataset.init){
+    initPeriodSelectors('graf', renderGraficos);
+    selAnio.dataset.init = '1';
+    document.getElementById('chk-excl-eventos-graf').addEventListener('change', renderGraficos);
+  }
+  const exclEventos = document.getElementById('chk-excl-eventos-graf').checked;
+  const {months: scopeMonths} = getPeriodScope('graf');
+  const rows = gastoRows({exclEventos, mesesIn: scopeMonths});
+
+  // Donut categoria
+  const byCat = {};
+  rows.forEach(r => { byCat[r.categoria] = (byCat[r.categoria]||0) + Math.abs(r.importe); });
+  const catSorted = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  drawDoughnutChart('chart-donut-categoria', catSorted.map(e=>e[0]), catSorted.map(e=>e[1]), catSorted.map(e=>catColor(e[0])));
+
+  // Donut fijo/variable
+  const fijos = sum(rows.filter(r=>r.fijo_variable==='Fijo'));
+  const variables = sum(rows.filter(r=>r.fijo_variable==='Variable'));
+  drawDoughnutChart('chart-donut-fv', ['Fijo','Variable'], [fijos, variables], ['#3D6B5F','#8C3B3B']);
+
+  // Bar anual: total por año, fijo vs variable apilado (no depende del filtro de año/mes, da contexto)
+  const yrs = years();
+  const fijosPorAnio = yrs.map(y => sum(gastoRows({exclEventos, anio:y}).filter(r=>r.fijo_variable==='Fijo')));
+  const varsPorAnio = yrs.map(y => sum(gastoRows({exclEventos, anio:y}).filter(r=>r.fijo_variable==='Variable')));
+  drawBarChart('chart-bar-anual', yrs.map(String), [
+    {label:'Fijo', data:fijosPorAnio, color:'#3D6B5F'},
+    {label:'Variable', data:varsPorAnio, color:'#8C3B3B'}
+  ], true);
+
+  // Bar por fuente — respeta el periodo seleccionado
+  const fuentes = Array.from(new Set(MOV.map(m=>m.fuente))).sort();
+  const porFuente = fuentes.map(f => sum(gastoRows({exclEventos, mesesIn: scopeMonths, fuente:f})));
+  drawBarChart('chart-bar-fuente', fuentes, [
+    {label:'Gasto', data:porFuente, color:'#4B6660'}
+  ], false);
+}
+
+// ---------- FILE LOADING ----------
+function xlsxRowsToMovimientos(rows){
+  return rows.map((r, idx) => {
+    let fecha = r['Fecha'];
+    let fechaStr, fechaIso;
+    if(fecha instanceof Date){
+      fechaStr = String(fecha.getDate()).padStart(2,'0')+'/'+String(fecha.getMonth()+1).padStart(2,'0')+'/'+fecha.getFullYear();
+      fechaIso = fecha.getFullYear()+'-'+String(fecha.getMonth()+1).padStart(2,'0')+'-'+String(fecha.getDate()).padStart(2,'0');
+    } else {
+      fechaStr = String(fecha||'').trim();
+      const parts = fechaStr.split('/');
+      fechaIso = parts.length===3 ? `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}` : '';
+    }
+    const importeRaw = r['Importe'];
+    const importe = typeof importeRaw === 'number' ? importeRaw : parseFloat(String(importeRaw).replace(/\./g,'').replace(',', '.'));
+    return {
+      row_id: r['ID'] || ('XLS-' + idx),
+      fecha: fechaStr,
+      fecha_iso: fechaIso,
+      fuente: r['Fuente'],
+      tipo: r['Tipo'],
+      concepto: r['Concepto'],
+      importe: isNaN(importe) ? 0 : importe,
+      categoria: r['Categoría'],
+      categoria_ingreso: r['Categoría ingreso'] || undefined,
+      fijo_variable: r['Fijo/Variable'],
+      incluir_en_gasto: r['Incluir en gasto'] === true || r['Incluir en gasto'] === 'TRUE' || r['Incluir en gasto'] === 1,
+      es_evento_puntual: r['Evento puntual'] === true || r['Evento puntual'] === 'TRUE' || r['Evento puntual'] === 1,
+      evento_puntual: r['Descripción evento'] || null,
+      es_estimado: r['Estimado'] === true || r['Estimado'] === 'TRUE' || r['Estimado'] === 1,
+      es_importado: r['Importado'] === true || r['Importado'] === 'TRUE' || r['Importado'] === 1,
+      observaciones: r['Observaciones'] || null
+    };
+  });
+}
+
+
+// ---------- DIÁLOGOS PROPIOS ----------
+// confirm()/prompt() nativos pueden estar bloqueados dentro del visor de claude.ai
+// (iframe restringido) y devolver false en silencio; estos funcionan en cualquier sitio.
+function openDialog({message, input, defaultValue, okLabel, danger}){
+  return new Promise(resolve => {
+    const prev = document.getElementById('dlg'); if(prev) prev.remove();
+    const wrap = document.createElement('div');
+    wrap.id = 'dlg';
+    wrap.innerHTML = `<div class="dlg-box" role="dialog" aria-modal="true">
+        <p class="dlg-msg"></p>
+        ${input ? '<input type="text" class="dlg-input">' : ''}
+        <div class="dlg-actions">
+          <button class="btn secondary dlg-cancel">Cancelar</button>
+          <button class="btn ${danger ? 'danger dlg-danger' : ''} dlg-ok"></button>
+        </div></div>`;
+    wrap.querySelector('.dlg-msg').textContent = message;
+    wrap.querySelector('.dlg-ok').textContent = okLabel || 'Aceptar';
+    const inp = wrap.querySelector('.dlg-input');
+    if(inp) inp.value = defaultValue || '';
+    document.body.appendChild(wrap);
+    const done = (val) => { wrap.remove(); document.removeEventListener('keydown', onKey); resolve(val); };
+    const ok = () => { if(inp){ const v = inp.value.trim(); if(!v){ inp.focus(); return; } done(v); } else done(true); };
+    const onKey = (e) => { if(e.key === 'Escape') done(input ? null : false); if(e.key === 'Enter') ok(); };
+    document.addEventListener('keydown', onKey);
+    wrap.querySelector('.dlg-cancel').addEventListener('click', () => done(input ? null : false));
+    wrap.querySelector('.dlg-ok').addEventListener('click', ok);
+    wrap.addEventListener('click', (e) => { if(e.target === wrap) done(input ? null : false); });
+    setTimeout(() => (inp || wrap.querySelector('.dlg-ok')).focus(), 30);
+  });
+}
+function askConfirm(message, okLabel, danger){ return openDialog({message, okLabel, danger}); }
+function askText(message, defaultValue, okLabel){ return openDialog({message, input:true, defaultValue, okLabel}); }
+
+// ---------- ESCENARIOS CON NOMBRE ----------
+// Viven dentro del mismo estado que los movimientos (localStorage y fichero de Drive),
+// así un único JSON lleva el consolidado + todos los escenarios. El "escenario de trabajo"
+// es lo que se ve ahora en Proyecciones; guardarlo lo copia a la lista con un nombre.
+let ESCENARIOS = [];          // [{id, nombre, guardadoEn, datos:{...}}]
+let ESCENARIO_ACTIVO = null;  // id del escenario del que parte lo que se ve, o null
+
+function currentScenarioData(){
+  return JSON.parse(JSON.stringify({
+    horizonte: parseInt(document.getElementById('horizonte-slider').value, 10),
+    baseMeses: parseInt(document.getElementById('sel-base-meses').value, 10),
+    ingresoBaseOverride: INGRESO_BASE_OVERRIDE,
+    catBaseOverrides: CAT_BASE_OVERRIDES,
+    monthlyGastoOverrides: MONTHLY_GASTO_OVERRIDES,
+    monthlyIngresoOverrides: MONTHLY_INGRESO_OVERRIDES,
+    eventosFuturos: EVENTOS_FUTUROS
+  }));
+}
+function applyScenarioData(d){
+  const esc = JSON.parse(JSON.stringify(d || {}));
+  if(esc.horizonte) document.getElementById('horizonte-slider').value = esc.horizonte;
+  if(esc.baseMeses) document.getElementById('sel-base-meses').value = esc.baseMeses;
+  INGRESO_BASE_OVERRIDE = esc.ingresoBaseOverride ?? null;
+  CAT_BASE_OVERRIDES = esc.catBaseOverrides || {};
+  MONTHLY_GASTO_OVERRIDES = esc.monthlyGastoOverrides || {};
+  MONTHLY_INGRESO_OVERRIDES = esc.monthlyIngresoOverrides || {};
+  EVENTOS_FUTUROS = esc.eventosFuturos || [];
+  FOCUSED_MONTH = null;
+  const fb = document.getElementById('proy-mes-focus-block'); if(fb) fb.style.display = 'none';
+  document.getElementById('horizonte-val').textContent = document.getElementById('horizonte-slider').value;
+  renderEventosFuturosList();
+  renderProjectionOutput();
+}
+function activeScenario(){ return ESCENARIOS.find(e => e.id === ESCENARIO_ACTIVO) || null; }
+function scenarioIsDirty(){
+  const a = activeScenario();
+  if(!a) return false;
+  return JSON.stringify(a.datos) !== JSON.stringify(currentScenarioData());
+}
+function newScenarioId(){ return 'esc' + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function uniqueScenarioName(nombre){
+  let n = nombre, i = 2;
+  while(ESCENARIOS.some(e => e.nombre.toLowerCase() === n.toLowerCase())) n = `${nombre} (${i++})`;
+  return n;
+}
+
+function renderEscenariosBar(){
+  const sel = document.getElementById('esc-select');
+  if(!sel) return;
+  const opts = [];
+  if(!activeScenario()) opts.push('<option value="">— Escenario de trabajo (sin guardar) —</option>');
+  ESCENARIOS.forEach(e => opts.push(`<option value="${e.id}">${escapeHtml(e.nombre)}</option>`));
+  const html = opts.join('');
+  if(sel.innerHTML !== html) sel.innerHTML = html;
+  sel.value = ESCENARIO_ACTIVO || '';
+  sel.disabled = !ESCENARIOS.length;
+  updateEscenarioStatus();
+}
+// Solo toca el DOM si algo cambia (el MutationObserver de #app dispararía otro guardado).
+function updateEscenarioStatus(){
+  const el = document.getElementById('esc-status'); if(!el) return;
+  const a = activeScenario();
+  const dirty = scenarioIsDirty();
+  const text = !a ? (ESCENARIOS.length ? 'Lo que ves no está guardado como escenario' : 'Aún no hay escenarios guardados')
+                  : (dirty ? '● Cambios sin guardar en «' + a.nombre + '»' : '✓ Guardado · ' + fmtWhen(a.guardadoEn));
+  if(el.textContent !== text) el.textContent = text;
+  const state = !a ? 'none' : (dirty ? 'dirty' : 'clean');
+  if(el.dataset.state !== state) el.dataset.state = state;
+  const setDis = (id, v) => { const b = document.getElementById(id); if(b && b.disabled !== v) b.disabled = v; };
+  setDis('esc-update', !a || !dirty);
+  setDis('esc-rename', !a);
+  setDis('esc-delete', !a);
+}
+
+function wireEscenarios(){
+  const sel = document.getElementById('esc-select');
+  if(!sel || sel.dataset.wired) return;
+  sel.dataset.wired = '1';
+  sel.addEventListener('change', async () => {
+    const target = ESCENARIOS.find(e => e.id === sel.value);
+    if(!target){ renderEscenariosBar(); return; }
+    const hayCambios = activeScenario() ? scenarioIsDirty() : true; // el de trabajo sin guardar siempre cuenta
+    const aviso = activeScenario()
+      ? `Tienes cambios sin guardar en «${activeScenario().nombre}». Si cambias a «${target.nombre}», se perderán.`
+      : `Lo que ves ahora no está guardado como escenario. Si cambias a «${target.nombre}», se perderá.`;
+    if(hayCambios && !(await askConfirm(aviso, 'Cambiar de escenario', true))){ renderEscenariosBar(); return; }
+    ESCENARIO_ACTIVO = target.id;
+    applyScenarioData(target.datos);
+    renderEscenariosBar();
+    persistState();
+    showToast('Escenario «' + target.nombre + '» aplicado.');
+  });
+  document.getElementById('esc-save-new').addEventListener('click', async () => {
+    const sugerido = activeScenario() ? activeScenario().nombre + ' (copia)' : 'Escenario ' + (ESCENARIOS.length + 1);
+    const nombre = await askText('Nombre del escenario nuevo:', sugerido, 'Guardar escenario');
+    if(!nombre) return;
+    const esc = {id: newScenarioId(), nombre: uniqueScenarioName(nombre), guardadoEn: new Date().toISOString(), datos: currentScenarioData()};
+    ESCENARIOS.push(esc);
+    ESCENARIO_ACTIVO = esc.id;
+    renderEscenariosBar(); persistState();
+    showToast('Escenario «' + esc.nombre + '» guardado. Se incluirá en el fichero de Drive.');
+  });
+  document.getElementById('esc-update').addEventListener('click', () => {
+    const a = activeScenario(); if(!a) return;
+    a.datos = currentScenarioData(); a.guardadoEn = new Date().toISOString();
+    renderEscenariosBar(); persistState();
+    showToast('Cambios guardados en «' + a.nombre + '».');
+  });
+  document.getElementById('esc-rename').addEventListener('click', async () => {
+    const a = activeScenario(); if(!a) return;
+    const nombre = await askText('Nuevo nombre para «' + a.nombre + '»:', a.nombre, 'Renombrar');
+    if(!nombre || nombre === a.nombre) return;
+    const otros = ESCENARIOS.filter(e => e !== a);
+    a.nombre = otros.some(e => e.nombre.toLowerCase() === nombre.toLowerCase()) ? (() => { const tmp = ESCENARIOS; ESCENARIOS = otros; const n = uniqueScenarioName(nombre); ESCENARIOS = tmp; return n; })() : nombre;
+    renderEscenariosBar(); persistState();
+  });
+  document.getElementById('esc-delete').addEventListener('click', async () => {
+    const a = activeScenario(); if(!a) return;
+    if(!(await askConfirm('¿Eliminar el escenario «' + a.nombre + '»? Lo que ves ahora en Proyecciones no cambia; solo se borra de la lista.', 'Eliminar', true))) return;
+    ESCENARIOS = ESCENARIOS.filter(e => e !== a);
+    ESCENARIO_ACTIVO = null;
+    renderEscenariosBar(); persistState();
+  });
+}
+
+// Importa escenarios de un fichero: uno suelto (formato antiguo "escenario_finanzas_casa")
+// o todos los de otro fichero completo de la app. No toca los movimientos.
+function importScenariosFromJSON(parsed, fileName){
+  if(parsed && parsed.escenario_finanzas_casa){
+    const base = (fileName || 'Escenario importado').replace(/\.json$/i,'').replace(/^escenario_proyeccion_finanzas_casa_?/,'Escenario ') || 'Escenario importado';
+    const esc = {id: newScenarioId(), nombre: uniqueScenarioName(base.trim()), guardadoEn: new Date().toISOString(), datos: parsed.escenario_finanzas_casa};
+    ESCENARIOS.push(esc); ESCENARIO_ACTIVO = esc.id;
+    applyScenarioData(esc.datos);
+    return {added: 1, applied: esc.nombre};
+  }
+  if(parsed && Array.isArray(parsed.escenarios)){
+    let added = 0;
+    parsed.escenarios.forEach(e => {
+      if(!e || !e.datos) return;
+      if(ESCENARIOS.some(x => x.id === e.id && JSON.stringify(x.datos) === JSON.stringify(e.datos))) return; // ya lo tengo
+      ESCENARIOS.push({id: newScenarioId(), nombre: uniqueScenarioName(e.nombre || 'Escenario importado'), guardadoEn: e.guardadoEn || new Date().toISOString(), datos: e.datos});
+      added++;
+    });
+    return {added, applied: null};
+  }
+  throw new Error('formato no reconocido');
+}
+
+// ---------- PERSISTENCIA: NAVEGADOR (localStorage) + FICHERO EN DRIVE ----------
+// Modelo "A": los datos se guardan solos en este navegador (localStorage) en cada cambio,
+// y el fichero de la carpeta de Google Drive es la copia compartida entre dispositivos:
+// se abre con "Abrir fichero de Drive" y se guarda con "Guardar en Drive" (menú de
+// compartir en el móvil, "Guardar como" en el ordenador, o la descarga de claude.ai).
+// No depende de ninguna cuenta de Claude: la app funciona igual como HTML suelto.
+const STORAGE_KEY = 'finanzas_casa_v1';
+const DRIVE_STATE_KEY = 'finanzas_casa_drive_estado'; // {hash, at, filename} del último fichero guardado/abierto
+const SNAPSHOT_TIPO = 'finanzas_casa_estado';
+let DOWNLOADS = null;           // capacidad downloads del visor de claude.ai (null fuera de él)
+let LAST_LOCAL_HASH = null;     // huella del contenido actual (sin savedAt/lastView)
+let LAST_LOCAL_OK = true;
+
+function buildSnapshot(){
+  const movimientos = MOV.map(m => {
+    const out = {};
+    ['row_id','fecha','fecha_iso','fuente','tipo','concepto','importe','categoria','categoria_ingreso','fijo_variable',
+     'es_evento_puntual','evento_puntual','incluir_en_gasto','es_estimado','es_importado','observaciones']
+      .forEach(k => { if(m.hasOwnProperty(k)) out[k] = m[k]; });
+    if(m._edited) out.categoria_editada_manualmente = true;
+    return out;
+  });
+  const horizSlider = document.getElementById('horizonte-slider');
+  const baseSel = document.getElementById('sel-base-meses');
+  return {
+    tipo: SNAPSHOT_TIPO,
+    version: 2,
+    savedAt: new Date().toISOString(),
+    metadata: DATA ? DATA.metadata : null,
+    movimientos,
+    categoryList: CATEGORY_LIST,
+    lastView: CURRENT_VIEW,
+    eventosFuturos: EVENTOS_FUTUROS,
+    catBaseOverrides: CAT_BASE_OVERRIDES,
+    monthlyGastoOverrides: MONTHLY_GASTO_OVERRIDES,
+    monthlyIngresoOverrides: MONTHLY_INGRESO_OVERRIDES,
+    ingresoBaseOverride: INGRESO_BASE_OVERRIDE,
+    horizonte: horizSlider ? horizSlider.value : null,
+    baseMeses: baseSel ? baseSel.value : null,
+    escenarios: ESCENARIOS,
+    escenarioActivo: ESCENARIO_ACTIVO
+  };
+}
+
+function isFullSnapshot(json){
+  return !!json && (json.tipo === SNAPSHOT_TIPO || Array.isArray(json.categoryList) || Array.isArray(json.eventosFuturos) || Array.isArray(json.escenarios));
+}
+
+// Huella del contenido: lo que cambia al navegar (vista actual, hora) no cuenta como cambio.
+function contentHash(snap){
+  const {savedAt, lastView, ...rest} = snap;
+  const str = JSON.stringify(rest);
+  let h = 0x811c9dc5;
+  for(let i=0;i<str.length;i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193); }
+  return (h>>>0).toString(16) + ':' + str.length;
+}
+
+function readDriveState(){
+  try{ return JSON.parse(localStorage.getItem(DRIVE_STATE_KEY) || 'null'); }catch(_){ return null; }
+}
+function writeDriveState(st){
+  try{ localStorage.setItem(DRIVE_STATE_KEY, JSON.stringify(st)); }catch(_){}
+}
+
+function restoreFromSnapshot(snap){
+  parseData({metadata: snap.metadata, movimientos: snap.movimientos});
+  // Combina tu lista guardada con las categorías por defecto actuales, para que si se
+  // añade una categoría nueva en una actualización de la app (como "Empleada del hogar"),
+  // te aparezca aunque ya tuvieras una sesión guardada de antes.
+  if(Array.isArray(snap.categoryList)){
+    CATEGORY_LIST = Array.from(new Set([...snap.categoryList, ...Object.keys(CATEGORY_COLORS)]));
+  }
+  EVENTOS_FUTUROS = Array.isArray(snap.eventosFuturos) ? snap.eventosFuturos : [];
+  CAT_BASE_OVERRIDES = snap.catBaseOverrides || {};
+  MONTHLY_GASTO_OVERRIDES = snap.monthlyGastoOverrides || {};
+  MONTHLY_INGRESO_OVERRIDES = snap.monthlyIngresoOverrides || {};
+  INGRESO_BASE_OVERRIDE = (snap.ingresoBaseOverride !== undefined) ? snap.ingresoBaseOverride : null;
+  ESCENARIOS = Array.isArray(snap.escenarios) ? snap.escenarios : [];
+  ESCENARIO_ACTIVO = ESCENARIOS.some(e => e.id === snap.escenarioActivo) ? snap.escenarioActivo : null;
+  document.getElementById('upload-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  setupNav();
+  if(snap.horizonte) document.getElementById('horizonte-slider').value = snap.horizonte;
+  if(snap.baseMeses) document.getElementById('sel-base-meses').value = snap.baseMeses;
+  const validViews = SECTIONS.map(s=>s.id);
+  showView(validViews.includes(snap.lastView) ? snap.lastView : 'resumen');
+}
+
+let _persistTimer = null;
+function persistState(){
+  clearTimeout(_persistTimer);
+  _persistTimer = setTimeout(_doPersistState, 400);
+}
+function _doPersistState(){
+  if(!MOV || !MOV.length) return;
+  let snapshot;
+  try{
+    snapshot = buildSnapshot();
+    LAST_LOCAL_HASH = contentHash(snapshot);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
+    LAST_LOCAL_OK = true;
+  }catch(e){
+    console.warn('No se ha podido guardar en este navegador (quizá no queda espacio):', e);
+    LAST_LOCAL_OK = false;
+  }
+  updateSaveStatus();
+  updateEscenarioStatus();
+}
+
+function tryLoadFromLocalStorage(){
+  let snap;
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return false;
+    snap = JSON.parse(raw);
+    if(!snap || !Array.isArray(snap.movimientos) || !snap.movimientos.length) return false;
+  }catch(e){
+    console.warn('No se ha podido leer lo guardado en este navegador:', e);
+    try{ localStorage.removeItem(STORAGE_KEY); }catch(_){}
+    return false;
+  }
+  try{
+    restoreFromSnapshot(snap);
+    return true;
+  }catch(e){
+    console.warn('No se ha podido restaurar lo guardado en este navegador:', e);
+    return false;
+  }
+}
+
+function clearLocalStorageData(){
+  try{ localStorage.removeItem(STORAGE_KEY); localStorage.removeItem(DRIVE_STATE_KEY); }catch(_){}
+}
+
+function hasUnsavedDriveChanges(){
+  if(!MOV || !MOV.length || !LAST_LOCAL_HASH) return false;
+  const st = readDriveState();
+  return !st || st.hash !== LAST_LOCAL_HASH;
+}
+
+function fmtWhen(iso){
+  const d = new Date(iso); if(isNaN(d)) return '';
+  const hm = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+  const today = new Date(); const y = new Date(today); y.setDate(today.getDate()-1);
+  if(d.toDateString() === today.toDateString()) return 'hoy ' + hm;
+  if(d.toDateString() === y.toDateString()) return 'ayer ' + hm;
+  return d.toLocaleDateString('es-ES', {day:'numeric', month:'short'}) + ' ' + hm;
+}
+
+// Pinta el estado en la barra lateral y en la barra móvil. Solo toca el DOM si el texto
+// cambia, porque el MutationObserver de #app dispararía otro guardado (bucle).
+function updateSaveStatus(){
+  const st = readDriveState();
+  const dirty = hasUnsavedDriveChanges();
+  let line1, line2, cls;
+  line1 = LAST_LOCAL_OK ? '💾 Guardado en este navegador' : '⚠ No se ha podido guardar en este navegador';
+  if(dirty){
+    line2 = st ? '● Cambios sin guardar en Drive (último: ' + fmtWhen(st.at) + ')' : '● Aún no se ha guardado en Drive';
+    cls = 'dirty';
+  } else {
+    line2 = '✓ Al día con el fichero de Drive' + (st && st.at ? ' (' + fmtWhen(st.at) + ')' : '');
+    cls = 'clean';
+  }
+  if(!LAST_LOCAL_OK) cls = 'error';
+  const set = (id, text, title) => {
+    const el = document.getElementById(id); if(!el) return;
+    if(el.textContent !== text) el.textContent = text;
+    if(title !== undefined && el.title !== title) el.title = title;
+    if(el.dataset.state !== cls) el.dataset.state = cls;
+  };
+  set('sync-status', line1 + '\n' + line2);
+  set('mobile-sync-dot', dirty || !LAST_LOCAL_OK ? '●' : '✓', line1 + ' · ' + line2);
+  set('mobile-sync-text', line2);
+}
+
+// ---------- GUARDAR UN FICHERO (Drive u otro destino) ----------
+// Orden: 1) descarga del visor de claude.ai (en la app de iOS abre el menú de compartir);
+// 2) "Guardar como" del navegador de escritorio (permite elegir la carpeta de Drive para escritorio);
+// 3) menú de compartir del móvil (Chrome Android / Safari iOS → Google Drive);
+// 4) descarga normal. Devuelve 'saved' | 'cancelled' | 'failed'.
+const MIME_BY_EXT = {json:'application/json', xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', csv:'text/csv'};
+let LAST_SAVED_NAME = null;
+async function saveFileAnywhere(blob, filename){
+  const ext = (filename.split('.').pop() || '').toLowerCase();
+  LAST_SAVED_NAME = filename;
+  if(DOWNLOADS){
+    try{ await DOWNLOADS.save({filename, data: blob}); return 'saved'; }
+    catch(e){
+      if(e && e.code === 'declined') return 'cancelled';
+      console.warn('downloads.save no disponible, pruebo otra vía:', e);
+    }
+  }
+  const isTouch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+  if(!isTouch && typeof window.showSaveFilePicker === 'function'){
+    try{
+      const handle = await window.showSaveFilePicker({suggestedName: filename,
+        types: [{description: ext.toUpperCase(), accept: {[MIME_BY_EXT[ext] || 'application/octet-stream']: ['.' + ext]}}]});
+      const w = await handle.createWritable(); await w.write(blob); await w.close();
+      return 'saved';
+    }catch(e){
+      if(e && e.name === 'AbortError') return 'cancelled';
+      console.warn('showSaveFilePicker falló, pruebo otra vía:', e);
+    }
+  }
+  try{
+    // Chrome para Android solo deja compartir ciertos tipos (texto, csv, pdf, imágenes...),
+    // y JSON no está entre ellos: se comparte como .txt con el mismo contenido. La app
+    // abre .txt igual que .json, así que al cargarlo desde Drive no hay diferencia.
+    let shareName = filename, shareType = MIME_BY_EXT[ext] || blob.type || 'application/octet-stream';
+    if(ext === 'json'){ shareName = filename.replace(/\.json$/i, '.txt'); shareType = 'text/plain'; }
+    const file = new File([blob], shareName, {type: shareType});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({files:[file], title: shareName});
+      LAST_SAVED_NAME = shareName;
+      return 'saved';
+    }
+  }catch(e){
+    if(e && e.name === 'AbortError') return 'cancelled';
+    console.warn('Compartir no disponible, descargo el fichero:', e);
+  }
+  try{ downloadBlob(blob, filename); return 'saved'; }
+  catch(e){ console.warn('Descarga fallida:', e); return 'failed'; }
+}
+
+function driveFilename(){
+  const d = new Date();
+  const p = n => String(n).padStart(2,'0');
+  return `finanzas_casa_${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}.json`;
+}
+
+async function saveToDrive(){
+  if(!MOV || !MOV.length) return;
+  const snap = buildSnapshot();
+  const hash = contentHash(snap);
+  const filename = driveFilename();
+  const blob = new Blob([JSON.stringify(snap)], {type:'application/json'});
+  document.querySelectorAll('.drive-save-btn').forEach(b => b.disabled = true);
+  let result;
+  try{ result = await saveFileAnywhere(blob, filename); }
+  finally{ document.querySelectorAll('.drive-save-btn').forEach(b => b.disabled = false); }
+  if(result === 'saved'){
+    writeDriveState({hash, at: new Date().toISOString(), filename});
+    LAST_LOCAL_HASH = hash;
+    showToast('Guardado como ' + (LAST_SAVED_NAME || filename) + '. Si lo has enviado a Drive, déjalo en la carpeta «Finanzas Casa».');
+  } else if(result === 'failed'){
+    showToast('No se ha podido generar el fichero. Prueba de nuevo.', true);
+  }
+  updateSaveStatus();
+}
+
+let _toastTimer = null;
+function showToast(text, isError){
+  let el = document.getElementById('toast');
+  if(!el){ el = document.createElement('div'); el.id = 'toast'; document.body.appendChild(el); }
+  el.textContent = text;
+  el.className = isError ? 'show error' : 'show';
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => { el.className = ''; }, 5000);
+}
+
+// Guarda automáticamente ante cualquier cambio dentro de la app (edición de categoría,
+// borrado, importación, ajustes de proyección...) sin tener que instrumentar cada función
+// una a una: cualquier cambio en el DOM de #app dispara un guardado (con espera de 400ms).
+const _appElForPersist = document.getElementById('app');
+if(_appElForPersist){
+  new MutationObserver(() => persistState()).observe(_appElForPersist, {childList:true, subtree:true, attributes:true, characterData:true});
+}
+
+function handleFile(file){
+  const status = document.getElementById('upload-status');
+  const errorEl = document.getElementById('upload-error');
+  errorEl.style.display = 'none';
+  status.textContent = 'Leyendo ' + file.name + '…';
+  const isXlsx = /\.xlsx$/i.test(file.name);
+
+  const finish = (json) => {
+    try{
+      if(!json.movimientos || !Array.isArray(json.movimientos) || !json.movimientos.length){
+        throw new Error('El fichero no tiene el formato esperado (falta "movimientos").');
+      }
+      if(isFullSnapshot(json)){
+        // Fichero guardado desde esta app (carpeta de Drive): trae también eventos futuros,
+        // ajustes de proyección, categorías... Se restaura todo tal cual.
+        restoreFromSnapshot(json);
+        const h = contentHash(buildSnapshot());
+        writeDriveState({hash: h, at: json.savedAt || new Date().toISOString(), filename: file.name});
+        LAST_LOCAL_HASH = h;
+      } else {
+        parseData(json);
+        document.getElementById('upload-screen').style.display = 'none';
+        document.getElementById('app').style.display = 'flex';
+        setupNav();
+        showView('resumen');
+      }
+      status.textContent = '';
+      persistState();
+    }catch(err){
+      errorEl.textContent = 'No se ha podido leer el fichero: ' + err.message;
+      errorEl.style.display = 'block';
+      status.textContent = '';
+    }
+  };
+
+  if(isXlsx){
+    if(typeof XLSX === 'undefined'){
+      errorEl.textContent = 'No se ha podido cargar la librería de Excel. Prueba a recargar la página.';
+      errorEl.style.display = 'block';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        const wb = XLSX.read(reader.result, {type:'array', cellDates:true});
+        const sheetName = wb.SheetNames.includes('Movimientos') ? 'Movimientos' : wb.SheetNames[0];
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], {defval:null});
+        const movimientos = xlsxRowsToMovimientos(rows);
+        finish({metadata:{fuente_carga:'xlsx'}, movimientos});
+      }catch(err){
+        errorEl.textContent = 'No se ha podido leer el Excel: ' + err.message;
+        errorEl.style.display = 'block';
+        status.textContent = '';
+      }
+    };
+    reader.onerror = () => { errorEl.textContent = 'Error al leer el fichero.'; errorEl.style.display = 'block'; };
+    reader.readAsArrayBuffer(file);
+  } else {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{ finish(JSON.parse(reader.result)); }
+      catch(err){
+        errorEl.textContent = 'No se ha podido leer el fichero: ' + err.message;
+        errorEl.style.display = 'block';
+        status.textContent = '';
+      }
+    };
+    reader.onerror = () => { errorEl.textContent = 'Error al leer el fichero.'; errorEl.style.display = 'block'; };
+    reader.readAsText(file);
+  }
+}
+
+function setupUpload(){
+  const drop = document.getElementById('drop');
+  const input = document.getElementById('fileinput');
+  input.addEventListener('change', (e) => { if(e.target.files[0]) handleFile(e.target.files[0]); });
+  ['dragenter','dragover'].forEach(evt => drop.addEventListener(evt, (e) => { e.preventDefault(); drop.classList.add('drag'); }));
+  ['dragleave','drop'].forEach(evt => drop.addEventListener(evt, (e) => { e.preventDefault(); drop.classList.remove('drag'); }));
+  drop.addEventListener('drop', (e) => {
+    const file = e.dataTransfer.files[0];
+    if(file) handleFile(file);
+  });
+  const openOther = async () => {
+    if(hasUnsavedDriveChanges() && !(await askConfirm('Tienes cambios que aún no has guardado en Drive. Si abres otro fichero, se sustituirán por los de ese fichero.', 'Abrir otro fichero', true))) return;
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('upload-screen').style.display = 'flex';
+    document.getElementById('upload-status').textContent = '';
+    document.getElementById('upload-back').style.display = (MOV && MOV.length) ? 'inline' : 'none';
+  };
+  document.querySelectorAll('.open-other-btn').forEach(b => b.addEventListener('click', () => { closeMobileMenu(); openOther(); }));
+  document.getElementById('upload-back').addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById('upload-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+  });
+  document.querySelectorAll('.drive-save-btn').forEach(b => b.addEventListener('click', () => { closeMobileMenu(); saveToDrive(); }));
+  document.querySelectorAll('.clear-storage-btn').forEach(b => b.addEventListener('click', async () => {
+    closeMobileMenu();
+    const extra = hasUnsavedDriveChanges() ? ' OJO: hay cambios que todavía no has guardado en Drive y se perderán.' : '';
+    if(!(await askConfirm('¿Borrar los datos guardados en este navegador? El fichero de Drive no se toca; la próxima vez tendrás que abrirlo de nuevo.' + extra, 'Borrar', true))) return;
+    clearLocalStorageData();
+    MOV = []; DATA = null; LAST_LOCAL_HASH = null; ESCENARIOS = []; ESCENARIO_ACTIVO = null;
+    EVENTOS_FUTUROS = []; CAT_BASE_OVERRIDES = {}; MONTHLY_GASTO_OVERRIDES = {}; MONTHLY_INGRESO_OVERRIDES = {};
+    INGRESO_BASE_OVERRIDE = null; SELECTED_ROWS.clear();
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('upload-screen').style.display = 'flex';
+    document.getElementById('upload-status').textContent = '';
+    document.getElementById('upload-back').style.display = 'none';
+  }));
+  const mm = document.getElementById('mobile-menu-btn');
+  if(mm) mm.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const panel = document.getElementById('mobile-menu');
+    panel.hidden = !panel.hidden;
+    mm.setAttribute('aria-expanded', String(!panel.hidden));
+  });
+  document.addEventListener('click', (e) => {
+    const panel = document.getElementById('mobile-menu');
+    if(panel && !panel.hidden && !panel.contains(e.target)) closeMobileMenu();
+  });
+  // Aviso al cerrar la pestaña con cambios sin guardar en Drive
+  window.addEventListener('beforeunload', (e) => {
+    if(hasUnsavedDriveChanges()){ e.preventDefault(); e.returnValue = ''; }
+  });
+}
+function closeMobileMenu(){
+  const panel = document.getElementById('mobile-menu');
+  if(panel && !panel.hidden){ panel.hidden = true; const mm=document.getElementById('mobile-menu-btn'); if(mm) mm.setAttribute('aria-expanded','false'); }
+}
+
+setupUpload();
+(function boot(){
+  // Lo guardado en este navegador se carga al instante; si no hay nada, pantalla de
+  // "Abrir fichero de Drive". La descarga del visor de claude.ai se activa en segundo
+  // plano solo si la app está abierta allí (fuera de claude.ai no existe y no hace falta).
+  tryLoadFromLocalStorage();
+  updateSaveStatus();
+  if(typeof window.claude !== 'undefined' && window.claude && typeof window.claude.use === 'function'){
+    window.claude.use('downloads').then(d => { DOWNLOADS = d || null; }).catch(() => { DOWNLOADS = null; });
+  }
+})();
+
+})();
+
+</script>
+</body>
+</html>
