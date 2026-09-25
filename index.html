@@ -3334,21 +3334,26 @@ async function saveFileAnywhere(blob, filename){
       console.warn('showSaveFilePicker falló, pruebo otra vía:', e);
     }
   }
-  try{
-    // Chrome para Android solo deja compartir ciertos tipos (texto, csv, pdf, imágenes...),
-    // y JSON no está entre ellos: se comparte como .txt con el mismo contenido. La app
-    // abre .txt igual que .json, así que al cargarlo desde Drive no hay diferencia.
-    let shareName = filename, shareType = MIME_BY_EXT[ext] || blob.type || 'application/octet-stream';
-    if(ext === 'json'){ shareName = filename.replace(/\.json$/i, '.txt'); shareType = 'text/plain'; }
-    const file = new File([blob], shareName, {type: shareType});
-    if(navigator.canShare && navigator.canShare({files:[file]})){
-      await navigator.share({files:[file], title: shareName});
-      LAST_SAVED_NAME = shareName;
-      return 'saved';
+  // El menú de compartir solo en móviles/tabletas: en el Mac, Safari también lo tiene, pero
+  // no permite guardar en una carpeta (solo Mail, Mensajes, AirDrop…), así que allí se descarga.
+  if(isTouch){
+    try{
+      const type = MIME_BY_EXT[ext] || blob.type || 'application/octet-stream';
+      let file = new File([blob], filename, {type});
+      // iPhone/iPad (Safari) comparten .json sin problema. Chrome para Android no deja
+      // compartir JSON: ahí se comparte como .txt con el mismo contenido (la app abre ambos).
+      if(!(navigator.canShare && navigator.canShare({files:[file]})) && ext === 'json'){
+        file = new File([blob], filename.replace(/\.json$/i, '.txt'), {type: 'text/plain'});
+      }
+      if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+        await navigator.share({files:[file], title: file.name});
+        LAST_SAVED_NAME = file.name;
+        return 'saved';
+      }
+    }catch(e){
+      if(e && e.name === 'AbortError') return 'cancelled';
+      console.warn('Compartir no disponible, descargo el fichero:', e);
     }
-  }catch(e){
-    if(e && e.name === 'AbortError') return 'cancelled';
-    console.warn('Compartir no disponible, descargo el fichero:', e);
   }
   try{ downloadBlob(blob, filename); return 'saved'; }
   catch(e){ console.warn('Descarga fallida:', e); return 'failed'; }
